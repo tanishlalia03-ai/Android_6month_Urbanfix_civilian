@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/navigation_home">
+
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="com.example.urbanfix.Bottomnavigation.Ui.HomeFragment"
+        android:label="Home" />
+
+    <fragment
+        android:id="@+id/navigation_report"
+        android:name="com.example.urbanfix.Bottomnavigation.Ui.ReportFragment"
+        android:label="Report" />
+
+    <fragment
+        android:id="@+id/navigation_complaints"
+        android:name="com.example.urbanfix.Bottomnavigation.Ui.ComplaintsFragment"
+        android:label="Complaints" />
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.example.urbanfix.Bottomnavigation.Ui.ProfileFragment"
+        android:label="Profile" />
+
+</navigation>
