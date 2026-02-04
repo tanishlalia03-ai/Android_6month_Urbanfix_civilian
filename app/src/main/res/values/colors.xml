@@ -19,4 +19,21 @@
     <color name="grey_light">#F5F5F5</color>
     <color name="grey_medium">#9E9E9E</color>
     <color name="grey_dark">#616161</color>
+    <color name="silver">#C0C0C0</color>
+    <color name="silver_dark">#616161</color>
+
+
+    <color name="electric_indigo">#6366F1</color>
+    <color name="mint_glaze">#10B981</color>
+    <color name="soft_coral">#FB7185</color>
+    <color name="slate_blue">#475569</color>
+
+
+
+    <color name="sage_dark">#344E41</color>
+    <color name="muted_gold">#D4AF37</color>
+    <color name="terracotta">#E2725B</color>
+    <color name="deep_teal">#006D77</color>
+
+
 </resources>

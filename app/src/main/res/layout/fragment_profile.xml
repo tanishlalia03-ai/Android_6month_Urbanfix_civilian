@@ -20,14 +20,24 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="24dp" />
 
-    <ImageView
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@drawable/ic_apple"
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        >
+        app:cardCornerRadius="50dp"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="true">
 
-    </ImageView>
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="12dp"
+            android:src="@drawable/ic_apple"
+            android:layout_gravity="center" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+
 
     <TextView
         android:layout_width="match_parent"
