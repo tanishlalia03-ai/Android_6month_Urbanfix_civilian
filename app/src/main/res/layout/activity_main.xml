@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:padding="10dp"
     android:id="@+id/main"
-    android:background="#FFFFFF">
+    android:background="@color/white">
 
     <TextView
         android:id="@+id/tvLoginTitle"
@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
         android:text="Log in"
-        android:textColor="#000000"
+        android:textColor="?attr/colorOnSurface"
         android:textSize="22sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -89,7 +89,7 @@
         android:layout_marginTop="10dp"
         android:text="Remember me"
         android:textSize="15sp"
-        android:textColor="@color/black"
+        android:textColor="?attr/colorOnSurface"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/passwordInputLayout" />
 
@@ -98,7 +98,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Forgot Password?"
-        android:textColor="#000000"
+        android:textColor="?attr/colorOnSurface"
         android:textSize="15sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/cbRememberMe"
@@ -113,7 +113,7 @@
         android:backgroundTint="@color/mint_glaze"
         android:text="Login"
         android:textAllCaps="false"
-        android:textColor="#FFFFFF"
+        android:textColor="?attr/colorOnSurface"
         app:cornerRadius="25dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -124,24 +124,26 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="Don't have an account? Sign Up here"
+        android:text="Don't have an account?"
         android:textSize="15sp"
-        android:textColor="#000000"
+        android:textColor="?attr/colorOnSurface"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btnLogin" />
 
-    <TextView
-        android:id="@+id/tvOrContinue"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSignUp"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="Or Continue With Account"
-        android:textSize="15sp"
-        android:textColor="#000000"
+        android:layout_marginTop="8dp"
+        android:text="Sign Up here"
+        android:textAllCaps="false"
+        android:textColor="#00D09E"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvNoAccount" />
+        app:layout_constraintTop_toBottomOf="@+id/tvNoAccount" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

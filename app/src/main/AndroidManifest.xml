@@ -11,11 +11,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Urbanfix">
-
         <activity
-        android:name=".MainActivity"
-        android:exported="false"/>
-
+            android:name=".SignupActivity2"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
         <activity
             android:name=".Bottomnavigation.BottomLayoutActivity"
             android:exported="false" />
@@ -24,7 +25,7 @@
             android:exported="false" />
         <activity
             android:name=".Splashscreen.SplashscreenActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
