@@ -143,42 +143,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvNoAccount" />
 
-    <LinearLayout
-        android:id="@+id/llSocialIcons"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvOrContinue">
-
-        <ImageView
-            android:id="@+id/ivGoogle"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:src="@drawable/ic_google"
-            android:padding="12dp"
-            android:background="@drawable/social_icon_bg"/>
-        <ImageView
-            android:id="@+id/ivFacebook"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginLeft="20dp"
-            android:src="@drawable/ic_facebook"
-            android:padding="12dp"
-            android:background="@drawable/social_icon_bg"
-            app:tint="#000000" />
-        <ImageView
-            android:id="@+id/ivApple"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginLeft="20dp"
-            android:padding="12dp"
-            android:src="@drawable/ic_apple"
-            android:background="@drawable/social_icon_bg"
-            app:tint="#000000" />
-    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

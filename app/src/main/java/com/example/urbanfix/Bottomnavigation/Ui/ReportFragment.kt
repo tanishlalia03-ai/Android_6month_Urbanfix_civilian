@@ -46,6 +46,8 @@ class ReportFragment : Fragment() {
             datePicker.addOnPositiveButtonClickListener { select ->
                 // Store date in variable
                 selectedDate = SimpleDateFormat("dd/MMM/yyyy", Locale.getDefault()).format(Date(select))
+
+                updateDisplay()
             }
         }
 
@@ -65,9 +67,22 @@ class ReportFragment : Fragment() {
                 val minute = timePicker.minute
                 // Store time in variable
                 selectedTime = String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
+                updateDisplay()
             }
         }
     } // End of onViewCreated
+
+
+    // Simple function to combine the strings and show them in the box
+    private fun updateDisplay() {
+        val combinedText = if (selectedDate.isNotEmpty() && selectedTime.isNotEmpty()) {
+            "$selectedDate - $selectedTime"
+        } else {
+            selectedDate + selectedTime // Shows whichever one is not empty
+        }
+
+        binding.etDateTimeDisplay.setText(combinedText)
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
