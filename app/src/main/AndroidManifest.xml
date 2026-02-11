@@ -11,6 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Urbanfix">
+
         <activity
             android:name=".SignupActivity2"
             android:exported="false" />
