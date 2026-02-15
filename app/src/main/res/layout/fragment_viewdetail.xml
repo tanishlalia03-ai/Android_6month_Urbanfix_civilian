@@ -4,14 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F5F5">
+    android:background="?android:attr/windowBackground"
+    android:clickable="true"
+    android:focusable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp"
-        android:background="#FFFFFF"
+        android:background="?attr/colorSurface"
         android:elevation="4dp">
 
         <TextView
@@ -19,9 +21,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Complaint Id: #10293"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:textStyle="bold"
-            android:textColor="#000000" />
+            android:textColor="?attr/colorPrimary" />
 
         <TextView
             android:id="@+id/tvCategory"
@@ -29,7 +31,8 @@
             android:layout_height="wrap_content"
             android:text="Category: Electricity"
             android:textSize="14sp"
-            android:textColor="#757575" />
+            android:layout_marginTop="4dp"
+            android:textColor="?attr/colorOnSurface" />
 
         <TextView
             android:id="@+id/tvStatus"
@@ -37,7 +40,7 @@
             android:layout_height="wrap_content"
             android:text="Status: Pending"
             android:textSize="14sp"
-            android:textColor="#757575" />
+            android:textColor="?attr/colorOnSurface" />
 
         <TextView
             android:id="@+id/tvUrgency"
@@ -45,16 +48,14 @@
             android:layout_height="wrap_content"
             android:text="Urgency: High"
             android:textSize="14sp"
-            android:textColor="#D32F2F" />
-
-        <TextView
-            android:id="@+id/tvDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Date: Feb 4, 2026"
-            android:textSize="12sp"
-            android:textColor="#9E9E9E" />
-    </LinearLayout>
+            android:textColor="?attr/colorError" /> <TextView
+        android:id="@+id/tvDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Date: Feb 4, 2026"
+        android:textSize="12sp"
+        android:textColor="?attr/colorOnSurface"
+        android:alpha="0.7" /> </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -66,13 +67,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:padding="16dp">
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="350dp"
+                android:layout_height="250dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="2dp">
+                app:cardElevation="2dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="?attr/colorOutlineVariant">
 
                 <ImageView
                     android:id="@+id/ivComplaintImage"
@@ -87,7 +90,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="?attr/colorSurface"
                 app:contentPadding="16dp">
 
                 <LinearLayout
@@ -99,7 +103,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Description"
-                        android:textColor="#2196F3"
+                        android:textColor="?attr/colorPrimary"
                         android:textStyle="bold"
                         android:textSize="14sp" />
 
@@ -109,6 +113,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="Enter your complaint details here..."
+                        android:textColor="?attr/colorOnSurface"
                         android:textSize="16sp"
                         android:lineSpacingExtra="4dp" />
                 </LinearLayout>
@@ -120,19 +125,20 @@
                 android:layout_height="wrap_content"
                 android:text="Location: Jalandhar, Punjab"
                 android:textSize="15sp"
-                android:layout_marginTop="16dp"
-                android:drawableStart="@android:drawable/ic_menu_mylocation"
-                android:drawablePadding="8dp"/>
+                android:layout_marginTop="20dp"
+                android:textColor="?attr/colorOnSurface"
+                android:drawablePadding="8dp"
+                app:drawableStartCompat="@android:drawable/ic_menu_mylocation"
+                app:drawableTint="?attr/colorPrimary" />
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:layout_marginBottom="24dp"
-                app:cardBackgroundColor="#E3F2FD"
+                app:cardBackgroundColor="?attr/colorSurface"
                 app:cardCornerRadius="8dp"
                 app:strokeWidth="1dp"
-                app:strokeColor="#BBDEFB">
+                app:strokeColor="?attr/colorPrimary">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -145,18 +151,49 @@
                         android:layout_height="wrap_content"
                         android:text="Government Update"
                         android:textStyle="bold"
-                        android:textColor="#0D47A1"/>
+                        android:textColor="?attr/colorPrimary"/>
 
                     <TextView
                         android:id="@+id/tvGovUpdate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
+                        android:textColor="?attr/colorOnSurface"
                         android:text="Status will be updated by the officer soon."
                         android:textSize="14sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="?attr/colorSurface"
+                app:contentPadding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Resolution Progress"
+                        android:textColor="?attr/colorPrimary"
+                        android:textStyle="bold"
+                        android:textSize="14sp" />
+
+                    <com.github.mikephil.charting.charts.PieChart
+                        android:id="@+id/complaintPieChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="250dp"
+                        android:layout_marginTop="8dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

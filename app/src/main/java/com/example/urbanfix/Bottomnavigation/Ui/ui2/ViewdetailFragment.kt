@@ -1,60 +1,64 @@
 package com.example.urbanfix.Bottomnavigation.Ui.ui2
 
+import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.urbanfix.R
+import com.github.mikephil.charting.charts.PieChart
+import com.github.mikephil.charting.data.PieData
+import com.github.mikephil.charting.data.PieDataSet
+import com.github.mikephil.charting.data.PieEntry
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [ViewdetailFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class ViewdetailFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_viewdetail, container, false)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment ViewdetailFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            ViewdetailFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // 1. Find the PieChart by the ID we added to the XML
+        val pieChart = view.findViewById<PieChart>(R.id.complaintPieChart)
+
+        // 2. Prepare Fake Data (e.g., 75% Work Done, 25% Pending)
+        val entries = ArrayList<PieEntry>()
+        entries.add(PieEntry(75f, "Fixed"))
+        entries.add(PieEntry(25f, "Pending"))
+
+        // 3. Style the Dataset
+        val dataSet = PieDataSet(entries, "")
+
+        // Using professional colors: Blue for progress, Light Gray for pending
+        val colors = arrayListOf(
+            Color.parseColor("#2196F3"), // Primary Blue
+            Color.parseColor("#E0E0E0")  // Light Gray
+        )
+        dataSet.colors = colors
+        dataSet.valueTextColor = Color.WHITE
+        dataSet.valueTextSize = 12f
+
+        // 4. Configure the Chart Look
+        val pieData = PieData(dataSet)
+        pieChart.data = pieData
+
+        // UI Enhancements
+        pieChart.description.isEnabled = false // Hide small description label
+        pieChart.isDrawHoleEnabled = true      // Make it a donut chart
+        pieChart.setHoleColor(Color.TRANSPARENT)
+        pieChart.centerText = "75% Done"       // Text in the middle
+        pieChart.setCenterTextColor(Color.parseColor("#2196F3"))
+        pieChart.setCenterTextSize(16f)
+
+        // 5. Animation (This will wow your mentor!)
+        pieChart.animateY(1400)
+
+        pieChart.invalidate() // Refresh chart
     }
 }

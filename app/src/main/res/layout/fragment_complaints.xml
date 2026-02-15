@@ -1,44 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="30dp"
+    android:padding="20dp"
     tools:context=".Bottomnavigation.Ui.ComplaintsFragment">
 
-    <!-- FILTER SECTION -->
-    <LinearLayout
+    <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="20dp"
-        android:weightSum="3">
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:scrollbars="none">
 
-        <Spinner
-            android:id="@+id/spinner_all"
-            android:layout_width="0dp"
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/filterChipGroup"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            app:selectionRequired="true"
+            app:singleSelection="true"
+            app:chipSpacingHorizontal="8dp">
 
-        <Spinner
-            android:id="@+id/spinner_category"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_all"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="All"
+                android:textColor="@android:color/white"
+                app:chipBackgroundColor="?attr/colorPrimary" />
 
-        <Spinner
-            android:id="@+id/spinner_status"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_favorite"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:text="Favorite"
+                app:chipIcon="@android:drawable/btn_star_big_on"
+                app:chipIconTint="@android:color/white"
+                app:chipSurfaceColor="?attr/colorPrimary" />
 
-    </LinearLayout>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_pending"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:text="Pending"
+                app:chipSurfaceColor="?attr/colorPrimary" />
 
-    <!-- COMPLAINTS LIST -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_completed"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:text="Completed"
+                app:chipSurfaceColor="?attr/colorPrimary" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_active"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:text="Active"
+                app:chipSurfaceColor="?attr/colorPrimary" />
+
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvComplaints"
         android:layout_width="match_parent"
@@ -49,4 +85,3 @@
         tools:listitem="@layout/item_complaints" />
 
 </LinearLayout>
-

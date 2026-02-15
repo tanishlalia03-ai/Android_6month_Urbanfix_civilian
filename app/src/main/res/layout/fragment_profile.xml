@@ -1,84 +1,177 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:padding="30dp"
-    tools:context=".Bottomnavigation.Ui.ProfileFragment">
+    android:fillViewport="true"
+    android:background="?android:attr/windowBackground">
 
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        app:cardCornerRadius="50dp"
-        app:cardElevation="4dp"
-        app:cardUseCompatPadding="true">
-
-        <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_margin="12dp"
-            android:src="@drawable/ic_apple"
-            android:layout_gravity="center" />
-
-    </com.google.android.material.card.MaterialCardView>
-
-
-
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Name :"
-        android:textSize="20sp"
-        android:layout_marginTop="20dp"
-        android:layout_marginLeft="10dp"
-        android:textColor="?attr/colorOnSurface"
-        />
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Email :"
-        android:textSize="20sp"
-        android:layout_marginTop="20dp"
-        android:layout_marginLeft="10dp"
-        android:textColor="?attr/colorOnSurface"
-        />
+        android:orientation="vertical"
+        android:padding="24dp"
+        tools:context=".Bottomnavigation.Ui.ProfileFragment">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Mobile :"
-        android:textSize="20sp"
-        android:layout_marginTop="20dp"
-        android:layout_marginLeft="10dp"
-        android:textColor="?attr/colorOnSurface"
-        />
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="32dp">
 
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="130dp"
+                android:layout_height="130dp"
+                app:cardCornerRadius="65dp"
+                app:cardElevation="6dp"
+                app:strokeColor="?attr/colorPrimary"
+                app:strokeWidth="3dp">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_apple" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="bottom|end"
+                app:cardBackgroundColor="?attr/colorPrimary"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="8dp"
+                app:strokeColor="?android:attr/windowBackground"
+                app:strokeWidth="2dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_edit"
+                    app:tint="@android:color/white" />
+            </com.google.android.material.card.MaterialCardView>
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ACCOUNT INFORMATION"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:layout_marginBottom="12dp"
+            android:textColor="?attr/colorPrimary"
+            android:letterSpacing="0.15" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="?attr/colorOnSurface"
+            app:cardBackgroundColor="?attr/colorSurface">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="16dp"
+                    android:gravity="center_vertical"
+                    android:padding="16dp"
+                    android:text="John Doe"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface"
+                    app:drawableStartCompat="@drawable/ic_person"
+                    app:drawableTint="?attr/colorPrimary" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:background="?attr/colorOnSurface"
+                    android:alpha="0.1" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="16dp"
+                    android:gravity="center_vertical"
+                    android:padding="16dp"
+                    android:text="johndoe@example.com"
+                    android:textSize="16sp"
+                    android:textColor="?attr/colorOnSurface"
+                    app:drawableStartCompat="@drawable/ic_mail"
+                    app:drawableTint="?attr/colorPrimary" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:background="?attr/colorOnSurface"
+                    android:alpha="0.1" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="16dp"
+                    android:gravity="center_vertical"
+                    android:padding="16dp"
+                    android:text="+1 234 567 890"
+                    android:textSize="16sp"
+                    android:textColor="?attr/colorOnSurface"
+                    app:drawableStartCompat="@drawable/ic_phone"
+                    app:drawableTint="?attr/colorPrimary" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_edit_profile"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="match_parent"
-            android:layout_marginTop="20dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:layout_height="56dp"
+            android:layout_marginTop="32dp"
             android:text="Edit Profile"
-            app:icon="@drawable/ic_edit" />
-
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="16dp"
+            app:icon="@drawable/ic_edit"
+            app:iconGravity="textStart"
+            app:iconSize="20dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_logout"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Logout"
-            android:textColor="@color/red"
+            android:layout_height="56dp"
+            android:layout_marginTop="8dp"
+            android:text="Logout Account"
+            android:textAllCaps="false"
+            android:textColor="#D32F2F"
+            android:textSize="15sp"
             app:icon="@drawable/ic_logout"
-            app:iconTint="@color/red"/>
+            app:iconGravity="textStart"
+            app:iconTint="#D32F2F" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="UrbanFix Version 1.0.4"
+            android:gravity="center"
+            android:alpha="0.5"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="12sp"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="20dp"/>
 
-
-
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>

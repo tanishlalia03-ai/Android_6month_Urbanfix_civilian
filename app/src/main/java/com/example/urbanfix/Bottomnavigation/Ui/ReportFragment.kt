@@ -81,7 +81,7 @@ class ReportFragment : Fragment() {
             selectedDate + selectedTime // Shows whichever one is not empty
         }
 
-        binding.etDateTimeDisplay.setText(combinedText)
+        binding.btnPickDate.setText(combinedText)
     }
 
     override fun onDestroyView() {

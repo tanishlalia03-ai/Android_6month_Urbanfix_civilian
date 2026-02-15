@@ -9,28 +9,59 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.urbanfix.R
 import com.example.urbanfix.Recyclerview.Complaint
-import com.example.urbanfix.Recyclerview.complaint_adapter
+import com.example.urbanfix.Recyclerview.ComplaintAdapter
+import com.google.android.material.chip.ChipGroup
 
 class ComplaintsFragment : Fragment() {
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    private var adapter: ComplaintAdapter? = null
+    private var fullList: List<Complaint> = listOf()
+    private val displayedList = mutableListOf<Complaint>()
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        // Use the layout you provided
         val view = inflater.inflate(R.layout.fragment_complaints, container, false)
 
-        val fakeData = listOf(
-            Complaint("UF-101", "Pending"),
-            Complaint("UF-102", "In Progress"),
-            Complaint("UF-103", "Resolved"),
-            Complaint("UF-104", "Under Review"),
-            Complaint("UF-105", "Fixed")
+        fullList = listOf(
+            Complaint("#12345", "Pending", isFavorite = true),
+            Complaint("#12346", "Active", isFavorite = false),
+            Complaint("#12347", "Completed", isFavorite = true),
+            Complaint("#12348", "Pending", isFavorite = false),
+            Complaint("#12349", "Active", isFavorite = true)
         )
 
+        displayedList.clear()
+        displayedList.addAll(fullList)
+
+        // Find views safely
         val recyclerView = view.findViewById<RecyclerView>(R.id.rvComplaints)
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.adapter = complaint_adapter(fakeData)
+        val filterChipGroup = view.findViewById<ChipGroup>(R.id.filterChipGroup)
+
+        // Initialize Adapter
+        adapter = ComplaintAdapter(displayedList)
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        recyclerView.adapter = adapter
+
+        // Set listener only if filterChipGroup is not null
+        filterChipGroup?.setOnCheckedStateChangeListener { _, checkedIds ->
+            val selectedId = checkedIds.firstOrNull() ?: R.id.chip_all
+            filterData(selectedId)
+        }
 
         return view
+    }
+
+    private fun filterData(chipId: Int) {
+        val filtered = when (chipId) {
+            R.id.chip_favorite -> fullList.filter { it.isFavorite }
+            R.id.chip_pending -> fullList.filter { it.status == "Pending" }
+            R.id.chip_completed -> fullList.filter { it.status == "Completed" }
+            R.id.chip_active -> fullList.filter { it.status == "Active" }
+            else -> fullList
+        }
+
+        displayedList.clear()
+        displayedList.addAll(filtered)
+        adapter?.notifyDataSetChanged()
     }
 }

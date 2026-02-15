@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/navigation_home">
 
@@ -17,11 +18,38 @@
     <fragment
         android:id="@+id/navigation_complaints"
         android:name="com.example.urbanfix.Bottomnavigation.Ui.ComplaintsFragment"
-        android:label="Complaints" />
+        android:label="Complaints" >
+    <action
+        android:id="@+id/action_complaints_to_viewDetail"
+        app:destination="@id/navigation_view_detail" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_profile"
         android:name="com.example.urbanfix.Bottomnavigation.Ui.ProfileFragment"
-        android:label="Profile" />
+        android:label="Profile" >
 
+        <action
+            android:id="@+id/action_navigation_profile_to_editProfileFragment"
+            app:destination="@id/navigation_edit_profile"
+            />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_settings"
+        android:name="com.example.urbanfix.Bottomnavigation.Ui.ui2.SettingFragment"
+        android:label="Settings"
+        />
+
+    <fragment
+        android:id="@+id/navigation_edit_profile"
+        android:name="com.example.urbanfix.Bottomnavigation.Ui.ui2.EditProfileFragment"
+        android:label="Edit Profile"
+        tools:layout="@layout/fragment_editprofile" />
+
+    <fragment
+        android:id="@+id/navigation_view_detail"
+        android:name="com.example.urbanfix.Bottomnavigation.Ui.ui2.ViewdetailFragment"
+        android:label="Complaint Details"
+        tools:layout="@layout/fragment_viewdetail" />
 </navigation>
