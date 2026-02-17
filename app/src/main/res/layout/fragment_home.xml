@@ -33,7 +33,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Hello, "
-                        android:textSize="24sp"
+                        android:textSize="?android:attr/textSize"
                         android:textColor="?attr/colorOnSurface"
                         android:textStyle="bold" />
 
@@ -42,7 +42,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="User"
-                        android:textSize="24sp"
+                        android:textSize="?android:attr/textSize"
                         android:textColor="?attr/colorOnSurface"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -83,7 +83,7 @@
             android:textStyle="bold"
             android:text="Complaints status summary"
             android:textColor="?attr/colorOnSurface"
-            android:textSize="20sp" />
+            android:textSize="?android:attr/textSize"/>
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -111,14 +111,14 @@
                         android:layout_height="wrap_content"
                         android:text="05"
                         android:textColor="@color/red"
-                        android:textSize="20sp"
+                        android:textSize="?android:attr/textSize"
                         android:textStyle="bold" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Pending"
                         android:textColor="@color/black"
-                        android:textSize="14sp" />
+                        android:textSize="?android:attr/textSize"/>
                 </LinearLayout>
 
                 <View android:layout_width="1dp" android:layout_height="30dp" android:background="#40FFFFFF" android:layout_gravity="center"/>
@@ -134,14 +134,14 @@
                         android:layout_height="wrap_content"
                         android:text="03"
                         android:textColor="@color/green"
-                        android:textSize="20sp"
+                        android:textSize="?android:attr/textSize"
                         android:textStyle="bold" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Progress"
                         android:textColor="@color/black"
-                        android:textSize="14sp" />
+                        android:textSize="?android:attr/textSize" />
                 </LinearLayout>
 
                 <View android:layout_width="1dp" android:layout_height="30dp" android:background="#40FFFFFF" android:layout_gravity="center"/>
@@ -157,14 +157,14 @@
                         android:layout_height="wrap_content"
                         android:text="12"
                         android:textColor="@color/cyan"
-                        android:textSize="20sp"
+                        android:textSize="?android:attr/textSize"
                         android:textStyle="bold" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Completed"
                         android:textColor="@color/black"
-                        android:textSize="14sp" />
+                        android:textSize="?android:attr/textSize" />
                 </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>

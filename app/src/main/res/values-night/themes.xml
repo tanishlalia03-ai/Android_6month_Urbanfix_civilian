@@ -2,15 +2,40 @@
     <style name="Base.Theme.Urbanfix" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">#90CAF9</item>
         <item name="colorOnPrimary">#0D47A1</item>
-
         <item name="colorSecondary">#64B5F6</item>
         <item name="colorOnSecondary">#0D47A1</item>
-
         <item name="android:windowBackground">#121212</item>
         <item name="colorSurface">#1E1E1E</item>
-        <item name="colorOnSurface">#E2E3DE</item> <item name="android:statusBarColor">#121212</item>
+        <item name="colorOnSurface">#E2E3DE</item>
+        <item name="android:statusBarColor">#121212</item>
         <item name="android:windowLightStatusBar">false</item>
+
+        <item name="android:textSize">16sp</item>
     </style>
 
     <style name="Theme.Urbanfix" parent="Base.Theme.Urbanfix" />
+
+    <style name="Theme.Urbanfix.Small" parent="Theme.Urbanfix">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="Theme.Urbanfix.Medium" parent="Theme.Urbanfix">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="Theme.Urbanfix.Large" parent="Theme.Urbanfix">
+        <item name="android:textSize">22sp</item>
+    </style>
+
+    <style name="Theme.Urbanfix.Sans" parent="Theme.Urbanfix">
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="Theme.Urbanfix.Serif" parent="Theme.Urbanfix">
+        <item name="android:fontFamily">serif</item>
+    </style>
+
+    <style name="Theme.Urbanfix.Mono" parent="Theme.Urbanfix">
+        <item name="android:fontFamily">monospace</item>
+    </style>
 </resources>

@@ -15,34 +15,40 @@ import com.google.android.material.chip.ChipGroup
 class ComplaintsFragment : Fragment() {
 
     private var adapter: ComplaintAdapter? = null
-    private var fullList: List<Complaint> = listOf()
     private val displayedList = mutableListOf<Complaint>()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        // Use the layout you provided
-        val view = inflater.inflate(R.layout.fragment_complaints, container, false)
-
-        fullList = listOf(
+    // MOVE THIS HERE: This prevents the list from resetting when you switch tabs
+    private val fullList: MutableList<Complaint> by lazy {
+        mutableListOf(
             Complaint("#12345", "Pending", isFavorite = true),
             Complaint("#12346", "Active", isFavorite = false),
             Complaint("#12347", "Completed", isFavorite = true),
             Complaint("#12348", "Pending", isFavorite = false),
             Complaint("#12349", "Active", isFavorite = true)
         )
+    }
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.fragment_complaints, container, false)
+
+        // Sync the displayed list with our permanent fullList
         displayedList.clear()
         displayedList.addAll(fullList)
 
-        // Find views safely
         val recyclerView = view.findViewById<RecyclerView>(R.id.rvComplaints)
         val filterChipGroup = view.findViewById<ChipGroup>(R.id.filterChipGroup)
 
-        // Initialize Adapter
-        adapter = ComplaintAdapter(displayedList)
+        // Pass a callback to the adapter to update fullList in real-time
+        adapter = ComplaintAdapter(displayedList) { updatedItem ->
+            val index = fullList.indexOfFirst { it.id == updatedItem.id }
+            if (index != -1) {
+                fullList[index].isFavorite = updatedItem.isFavorite
+            }
+        }
+
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter
 
-        // Set listener only if filterChipGroup is not null
         filterChipGroup?.setOnCheckedStateChangeListener { _, checkedIds ->
             val selectedId = checkedIds.firstOrNull() ?: R.id.chip_all
             filterData(selectedId)

@@ -3,27 +3,27 @@ package com.example.urbanfix.Recyclerview
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox // Use CheckBox to match your XML
+import android.widget.CheckBox
 import android.widget.TextView
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import com.example.urbanfix.R
 import com.google.android.material.button.MaterialButton
 
-class ComplaintAdapter(private val complaintList: MutableList<Complaint>) :
-    RecyclerView.Adapter<ComplaintAdapter.ComplaintViewHolder>() {
+class ComplaintAdapter(
+    private val complaintList: MutableList<Complaint>,
+    private val onFavoriteChanged: (Complaint) -> Unit
+) : RecyclerView.Adapter<ComplaintAdapter.ComplaintViewHolder>() {
 
     class ComplaintViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val idText: TextView = view.findViewById(R.id.tvComplaintId)
         val statusText: TextView = view.findViewById(R.id.tvStatus)
         val btnViewDetail: MaterialButton = view.findViewById(R.id.btnViewDetail)
-        // Corrected type to CheckBox to stop the crash
         val ivFavorite: CheckBox = view.findViewById(R.id.ivStar)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ComplaintViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_complaints, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_complaints, parent, false)
         return ComplaintViewHolder(view)
     }
 
@@ -33,22 +33,18 @@ class ComplaintAdapter(private val complaintList: MutableList<Complaint>) :
         holder.idText.text = item.id
         holder.statusText.text = item.status
 
-        // --- Favorite Star Logic ---
-        // First, clear the listener to prevent accidental triggers while scrolling
+        // Stop listener, set state, then restart listener to prevent logical loops
         holder.ivFavorite.setOnCheckedChangeListener(null)
-
-        // Set the state based on data
         holder.ivFavorite.isChecked = item.isFavorite
 
-        // Update data when user clicks the star
-        holder.ivFavorite.setOnCheckedChangeListener { _, isChecked ->
+        holder.ivFavorite.setOnClickListener {
+            val isChecked = (it as CheckBox).isChecked
             item.isFavorite = isChecked
+            onFavoriteChanged(item) // Real-time update to Fragment
         }
 
-        // --- Navigation Logic ---
         holder.btnViewDetail.setOnClickListener { view ->
-            Navigation.findNavController(view)
-                .navigate(R.id.action_complaints_to_viewDetail)
+            Navigation.findNavController(view).navigate(R.id.action_complaints_to_viewDetail)
         }
     }
 

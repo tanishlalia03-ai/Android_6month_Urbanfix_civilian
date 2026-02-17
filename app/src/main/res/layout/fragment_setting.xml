@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?android:attr/windowBackground">
@@ -59,16 +58,13 @@
                         android:layout_marginStart="16dp"
                         android:text="App Theme"
                         android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/tv_current_theme"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="System Default"
-                        android:textColor="?android:attr/textColorSecondary"
-                        android:textSize="14sp" />
-                </LinearLayout>
+                        android:textSize="?android:attr/textSize" /> <TextView
+                    android:id="@+id/tv_current_theme"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="System Default"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="?android:attr/textSize" /> </LinearLayout>
 
                 <View
                     android:layout_width="match_parent"
@@ -93,25 +89,20 @@
                         android:textStyle="bold"
                         android:textColor="?attr/colorPrimary"
                         android:gravity="center"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:text="Font Size"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/tv_current_font_size"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Medium"
-                        android:textColor="?android:attr/textColorSecondary"
-                        android:textSize="14sp" />
-                </LinearLayout>
+                        android:textSize="?android:attr/textSize" /> <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="16dp"
+                    android:text="Font Size"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textSize="?android:attr/textSize" /> <TextView
+                    android:id="@+id/tv_current_font_size"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Medium"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="?android:attr/textSize" /> </LinearLayout>
 
                 <View
                     android:layout_width="match_parent"
@@ -142,64 +133,14 @@
                         android:layout_marginStart="16dp"
                         android:text="Font Style"
                         android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="16sp" />
-
-                    <TextView
+                        android:textSize="?android:attr/textSize" /> <TextView
                         android:id="@+id/tv_current_font_style"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Sans Serif"
                         android:textColor="?android:attr/textColorSecondary"
-                        android:textSize="14sp" />
-                </LinearLayout>
+                        android:textSize="?android:attr/textSize" /> </LinearLayout>
 
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Alerts"
-            android:textColor="?attr/colorPrimary"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            android:textAllCaps="true"
-            android:paddingStart="4dp"
-            android:paddingBottom="8dp" />
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="?attr/colorSurface">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:gravity="center_vertical">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@android:drawable/ic_lock_idle_alarm"
-                    app:tint="?attr/colorPrimary" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="16dp"
-                    android:text="Notifications"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="16sp" />
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/switch_notifications"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:thumbTint="?attr/colorPrimary" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

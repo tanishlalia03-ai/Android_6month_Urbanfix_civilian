@@ -30,7 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Category: Electricity"
-            android:textSize="14sp"
+            android:textSize="?android:attr/textSize"
             android:layout_marginTop="4dp"
             android:textColor="?attr/colorOnSurface" />
 
@@ -39,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Status: Pending"
-            android:textSize="14sp"
+            android:textSize="?android:attr/textSize"
             android:textColor="?attr/colorOnSurface" />
 
         <TextView
@@ -47,13 +47,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Urgency: High"
-            android:textSize="14sp"
+            android:textSize="?android:attr/textSize"
             android:textColor="?attr/colorError" /> <TextView
         android:id="@+id/tvDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Date: Feb 4, 2026"
-        android:textSize="12sp"
+        android:textSize="?android:attr/textSize"
         android:textColor="?attr/colorOnSurface"
         android:alpha="0.7" /> </LinearLayout>
 
@@ -105,7 +105,7 @@
                         android:text="Description"
                         android:textColor="?attr/colorPrimary"
                         android:textStyle="bold"
-                        android:textSize="14sp" />
+                        android:textSize="?android:attr/textSize" />
 
                     <TextView
                         android:id="@+id/tvDescription"
@@ -114,7 +114,7 @@
                         android:layout_marginTop="8dp"
                         android:text="Enter your complaint details here..."
                         android:textColor="?attr/colorOnSurface"
-                        android:textSize="16sp"
+                        android:textSize="?android:attr/textSize"
                         android:lineSpacingExtra="4dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -124,7 +124,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Location: Jalandhar, Punjab"
-                android:textSize="15sp"
+                android:textSize="?android:attr/textSize"
                 android:layout_marginTop="20dp"
                 android:textColor="?attr/colorOnSurface"
                 android:drawablePadding="8dp"
@@ -160,7 +160,7 @@
                         android:layout_marginTop="4dp"
                         android:textColor="?attr/colorOnSurface"
                         android:text="Status will be updated by the officer soon."
-                        android:textSize="14sp" />
+                        android:textSize="?android:attr/textSize" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -185,7 +185,7 @@
                         android:text="Resolution Progress"
                         android:textColor="?attr/colorPrimary"
                         android:textStyle="bold"
-                        android:textSize="14sp" />
+                        android:textSize="?android:attr/textSize" />
 
                     <com.github.mikephil.charting.charts.PieChart
                         android:id="@+id/complaintPieChart"

@@ -1,11 +1,13 @@
 package com.example.urbanfix.Bottomnavigation
 
+import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -18,13 +20,41 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class BottomLayoutActivity : AppCompatActivity() {
 
-    private lateinit var navController: NavController // Moved to class level for easy access
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val sharedPref = getSharedPreferences("Settings", Context.MODE_PRIVATE)
+
+        // --- 1. THEME MODE LOGIC (Dark/Light) ---
+        val savedThemeIndex = sharedPref.getInt("theme_mode_index", 2)
+        val mode = when (savedThemeIndex) {
+            0 -> AppCompatDelegate.MODE_NIGHT_NO
+            1 -> AppCompatDelegate.MODE_NIGHT_YES
+            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        }
+        AppCompatDelegate.setDefaultNightMode(mode)
+
+        // --- 2. FONT SIZE LOGIC ---
+        val fontSize = sharedPref.getString("font_size_key", "Medium")
+        when (fontSize) {
+            "Small" -> setTheme(R.style.Theme_Urbanfix_Small)
+            "Large" -> setTheme(R.style.Theme_Urbanfix_Large)
+            else -> setTheme(R.style.Theme_Urbanfix_Medium)
+        }
+
+        // --- 3. FONT STYLE LOGIC (Corrected) ---
+        val fontStyleIndex = sharedPref.getInt("font_style_index", 0)
+        when (fontStyleIndex) {
+            1 -> setTheme(R.style.Theme_Urbanfix_Serif)
+            2 -> setTheme(R.style.Theme_Urbanfix_Mono)
+            else -> setTheme(R.style.Theme_Urbanfix_Sans)
+        }
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_bottom_layout)
 
+        // --- Rest of your UI Setup (Untouched) ---
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
@@ -63,7 +93,6 @@ class BottomLayoutActivity : AppCompatActivity() {
                 true
             }
             R.id.action_help -> {
-                // --- NEW: Professional Help Dialog ---
                 MaterialAlertDialogBuilder(this)
                     .setTitle("UrbanFix Help")
                     .setIcon(android.R.drawable.ic_menu_help)

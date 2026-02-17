@@ -6,43 +6,48 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController // Import this!
+import androidx.navigation.fragment.findNavController
+import com.example.urbanfix.MainActivity
 import com.example.urbanfix.R
-import com.google.android.material.button.MaterialButton
+import com.example.urbanfix.databinding.FragmentProfileBinding
+import com.google.firebase.auth.FirebaseAuth
 
 class ProfileFragment : Fragment() {
+
+    private var _binding: FragmentProfileBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflates your ScrollView layout with John Doe's info
-        return inflater.inflate(R.layout.fragment_profile, container, false)
+    ): View {
+        _binding = FragmentProfileBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. MATCH IDs FROM YOUR XML
-        // XML ID was: android:id="@+id/btn_edit_profile"
-        val btnEditProfile = view.findViewById<MaterialButton>(R.id.btn_edit_profile)
-
-        // XML ID was: android:id="@+id/btn_logout"
-        val btnLogout = view.findViewById<MaterialButton>(R.id.btn_logout)
-
-        // 2. NAVIGATE USING NAVGRAPH ACTION
-        btnEditProfile.setOnClickListener {
-            try {
-                // This ID must match the <action> ID in your nav_graph.xml
-                findNavController().navigate(R.id.action_navigation_profile_to_editProfileFragment)
-            } catch (e: Exception) {
-                // This helps you find the error if the ID in nav_graph is typed wrong
-                Toast.makeText(requireContext(), "Check action ID in nav_graph!", Toast.LENGTH_SHORT).show()
-            }
+        binding.btnEditProfile.setOnClickListener {
+            findNavController().navigate(R.id.action_navigation_profile_to_editProfileFragment)
         }
 
-        btnLogout.setOnClickListener {
-            Toast.makeText(requireContext(), "Logging out...", Toast.LENGTH_SHORT).show()
+
+        binding.btnLogout.setOnClickListener {
+            FirebaseAuth.getInstance().signOut()
+
+            Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show()
+
+            val intent = android.content.Intent(requireContext(), MainActivity::class.java)
+            intent.flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+            startActivity(intent)
+            requireActivity().finish()
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
