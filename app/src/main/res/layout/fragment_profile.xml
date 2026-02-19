@@ -30,6 +30,7 @@
                 app:strokeWidth="3dp">
 
                 <ImageView
+                    android:id="@+id/iv_profile_display"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
@@ -81,12 +82,12 @@
                 android:padding="8dp">
 
                 <TextView
+                    android:id="@+id/tv_profile_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:drawablePadding="16dp"
                     android:gravity="center_vertical"
                     android:padding="16dp"
-                    android:text="John Doe"
                     android:textSize="?android:attr/textSize"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -101,12 +102,12 @@
                     android:alpha="0.1" />
 
                 <TextView
+                    android:id="@+id/tv_profile_email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:drawablePadding="16dp"
                     android:gravity="center_vertical"
                     android:padding="16dp"
-                    android:text="johndoe@example.com"
                     android:textSize="?android:attr/textSize"
                     android:textColor="?attr/colorOnSurface"
                     app:drawableStartCompat="@drawable/ic_mail"
@@ -120,12 +121,12 @@
                     android:alpha="0.1" />
 
                 <TextView
+                    android:id="@+id/tv_profile_phone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:drawablePadding="16dp"
                     android:gravity="center_vertical"
                     android:padding="16dp"
-                    android:text="+1 234 567 890"
                     android:textSize="?android:attr/textSize"
                     android:textColor="?attr/colorOnSurface"
                     app:drawableStartCompat="@drawable/ic_phone"
