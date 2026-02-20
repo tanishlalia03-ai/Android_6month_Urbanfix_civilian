@@ -28,7 +28,6 @@ class SignupActivity2 : AppCompatActivity() {
     // Appwrite Details
     private val bucketID = "6996dc680036b04ee5f0"
     private val appwriteManager by lazy { AppwriteManager.getInstance(applicationContext) }
-
     private lateinit var progressDialog: ProgressDialog
     private var selectedImageUri: Uri? = null
 

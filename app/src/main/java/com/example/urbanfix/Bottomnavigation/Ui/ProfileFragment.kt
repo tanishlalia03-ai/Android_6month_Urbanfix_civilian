@@ -27,7 +27,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         // 1. Navigate to Edit Profile Fragment
         binding.btnEditProfile.setOnClickListener {
-            // This uses your Navigation Graph to open the EditProfileFragment
             findNavController().navigate(R.id.action_navigation_profile_to_editProfileFragment)
         }
 
