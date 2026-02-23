@@ -34,26 +34,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/ic_apple" />
+                    android:src="@drawable/ic_person"
+                    app:tint="?attr/colorPrimary" />
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="bottom|end"
-                app:cardBackgroundColor="?attr/colorPrimary"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="8dp"
-                app:strokeColor="?android:attr/windowBackground"
-                app:strokeWidth="2dp">
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_edit"
-                    app:tint="@android:color/white" />
-            </com.google.android.material.card.MaterialCardView>
         </FrameLayout>
 
         <TextView

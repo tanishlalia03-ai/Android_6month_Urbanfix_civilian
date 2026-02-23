@@ -47,7 +47,7 @@
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
                     android:src="@drawable/ic_person"
-                    app:tint="@color/black" /> </com.google.android.material.card.MaterialCardView>
+                    app:tint="?attr/colorPrimary"/> </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/btnEditImage"
