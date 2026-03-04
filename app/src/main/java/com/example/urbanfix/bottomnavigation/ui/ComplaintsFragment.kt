@@ -1,4 +1,4 @@
-package com.example.urbanfix.Bottomnavigation.Ui
+package com.example.urbanfix.bottomnavigation.ui
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -8,8 +8,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.urbanfix.R
-import com.example.urbanfix.Recyclerview.Complaint
-import com.example.urbanfix.Recyclerview.ComplaintAdapter
+import com.example.urbanfix.recyclerview.Complaint
+import com.example.urbanfix.recyclerview.ComplaintAdapter
 import com.google.android.material.chip.ChipGroup
 
 class ComplaintsFragment : Fragment() {

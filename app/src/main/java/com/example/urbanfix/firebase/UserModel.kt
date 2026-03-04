@@ -1,4 +1,4 @@
-package com.example.urbanfix.Firebase
+package com.example.urbanfix.firebase
 
 data class UserModel(
     val name: String? = null,

@@ -1,4 +1,4 @@
-package com.example.urbanfix.Splashscreen
+package com.example.urbanfix.splashscreen
 
 import android.content.Intent
 import android.os.Bundle

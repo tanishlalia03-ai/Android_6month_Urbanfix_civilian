@@ -1,4 +1,4 @@
-package com.example.urbanfix.Bottomnavigation.Ui
+package com.example.urbanfix.bottomnavigation.ui
 
 import android.os.Bundle
 import android.view.View
@@ -6,7 +6,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
-import com.example.urbanfix.Firebase.UserModel
+import com.example.urbanfix.firebase.UserModel
 import com.example.urbanfix.R
 import com.example.urbanfix.databinding.FragmentProfileBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -42,6 +42,9 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         val uid = auth.currentUser?.uid ?: return
 
         database.child(uid).get().addOnSuccessListener { snapshot ->
+            // Safety check: ensure fragment is still attached to activity
+            if (!isAdded) return@addOnSuccessListener
+
             val user = snapshot.getValue(UserModel::class.java)
 
             if (user != null) {
@@ -49,17 +52,24 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 binding.tvProfileEmail.text = user.email ?: "No Email"
                 binding.tvProfilePhone.text = user.phone ?: "No Phone"
 
-                if (!user.imageUrl.isNullOrEmpty()) {
-                    Glide.with(this)
-                        .load(user.imageUrl)
+                // FIX: Check if imageUrl is valid and use a cleaner Glide call
+                val imagePath = user.imageUrl
+                if (!imagePath.isNullOrEmpty()) {
+                    Glide.with(requireContext()) // Use requireContext() for better stability
+                        .load(imagePath)
                         .placeholder(R.drawable.ic_person)
-                        .error(R.drawable.ic_apple)
+                        .error(R.drawable.ic_apple) // This shows if the URL is broken or unauthorized
                         .circleCrop()
                         .into(binding.ivProfileDisplay)
+                } else {
+                    // If no image, set default placeholder
+                    binding.ivProfileDisplay.setImageResource(R.drawable.ic_person)
                 }
             }
         }.addOnFailureListener { e ->
-            Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            if (isAdded) {
+                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

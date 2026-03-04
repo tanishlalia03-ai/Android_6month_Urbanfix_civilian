@@ -6,7 +6,7 @@ import android.view.animation.AnimationUtils // Add this import
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import com.example.urbanfix.Bottomnavigation.BottomLayoutActivity
+import com.example.urbanfix.bottomnavigation.BottomLayoutActivity
 import com.example.urbanfix.databinding.ActivityMainBinding
 import com.google.firebase.auth.FirebaseAuth
 
@@ -64,3 +64,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+

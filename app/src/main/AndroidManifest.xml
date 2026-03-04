@@ -29,13 +29,13 @@
             android:name=".MainActivity"
             android:exported="false" />
         <activity
-            android:name=".Bottomnavigation.BottomLayoutActivity"
+            android:name=".bottomnavigation.BottomLayoutActivity"
             android:exported="false" />
         <activity
-            android:name=".Constraintfiles.Constraint2Activity"
+            android:name=".constraintfiles.Constraint2Activity"
             android:exported="false" />
         <activity
-            android:name=".Splashscreen.SplashscreenActivity"
+            android:name=".splashscreen.SplashscreenActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

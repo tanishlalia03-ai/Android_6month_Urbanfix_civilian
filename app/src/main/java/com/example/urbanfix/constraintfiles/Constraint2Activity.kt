@@ -1,10 +1,8 @@
-package com.example.urbanfix.Constraintfiles
+package com.example.urbanfix.constraintfiles
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.urbanfix.R
 
 class Constraint2Activity : AppCompatActivity() {

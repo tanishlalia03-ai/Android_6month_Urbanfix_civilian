@@ -1,4 +1,4 @@
-package com.example.urbanfix.Bottomnavigation.Ui.ui2
+package com.example.urbanfix.bottomnavigation.ui.ui2
 
 import android.net.Uri
 import android.os.Bundle
@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
-import com.example.urbanfix.Appwrite.AppwriteManager
+import com.example.urbanfix.appwrite.AppwriteManager
 import com.example.urbanfix.R
 import com.example.urbanfix.databinding.FragmentEditprofileBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -30,16 +30,22 @@ class EditProfileFragment : Fragment() {
 
     private val auth = FirebaseAuth.getInstance()
     private val database = FirebaseDatabase.getInstance().getReference("Users")
+
+    // Constants
     private val bucketID = "6996dc680036b04ee5f0"
     private val projectID = "6996dc3e00250d7ae563"
-    private val appwriteManager by lazy { AppwriteManager.getInstance(requireContext().applicationContext) }
 
+    private val appwriteManager by lazy { AppwriteManager.getInstance(requireContext().applicationContext) }
     private var selectedImageUri: Uri? = null
 
     private val imagePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
             selectedImageUri = it
-            binding.ivProfilePicture.setImageURI(it)
+            // Immediate UI feedback using Glide for proper cropping
+            Glide.with(requireContext())
+                .load(it)
+                .circleCrop()
+                .into(binding.ivProfilePicture)
         }
     }
 
@@ -65,24 +71,27 @@ class EditProfileFragment : Fragment() {
     private fun fetchExistingData() {
         val uid = auth.currentUser?.uid ?: return
         database.child(uid).get().addOnSuccessListener { snapshot ->
+            if (!isAdded) return@addOnSuccessListener
+
             if (snapshot.exists()) {
                 binding.apply {
-                    etEditName.setText(snapshot.child("name").value?.toString())
-                    etEditEmail.setText(snapshot.child("email").value?.toString())
-                    etEditMobile.setText(snapshot.child("phone").value?.toString())
+                    etEditName.setText(snapshot.child("name").value?.toString() ?: "")
+                    etEditEmail.setText(snapshot.child("email").value?.toString() ?: "")
+                    etEditMobile.setText(snapshot.child("phone").value?.toString() ?: "")
 
                     val img = snapshot.child("imageUrl").value?.toString()
                     if (!img.isNullOrEmpty()) {
-                        Glide.with(this@EditProfileFragment)
+                        Glide.with(requireContext())
                             .load(img)
                             .placeholder(R.drawable.ic_person)
+                            .error(R.drawable.ic_person)
                             .circleCrop()
                             .into(ivProfilePicture)
                     }
                 }
             }
         }.addOnFailureListener {
-            Toast.makeText(requireContext(), "Failed to load data", Toast.LENGTH_SHORT).show()
+            if (isAdded) Toast.makeText(requireContext(), "Failed to load data", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -92,17 +101,12 @@ class EditProfileFragment : Fragment() {
         val phone = binding.etEditMobile.text.toString().trim()
         val uid = auth.currentUser?.uid ?: return
 
-        if (name.isEmpty()) {
-            binding.etEditName.error = "Required"; return
-        }
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            binding.etEditEmail.error = "Invalid Email"; return
-        }
-        if (phone.length != 10) {
-            binding.etEditMobile.error = "Invalid Phone"; return
-        }
+        // Validation
+        if (name.isEmpty()) { binding.etEditName.error = "Required"; return }
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) { binding.etEditEmail.error = "Invalid Email"; return }
+        if (phone.length != 10) { binding.etEditMobile.error = "10 digits required"; return }
 
-        // UI Feedback: Disable button and show user something is happening
+        // Progress UI
         binding.btnSaveProfile.isEnabled = false
         binding.btnSaveProfile.text = "Updating..."
 
@@ -114,32 +118,36 @@ class EditProfileFragment : Fragment() {
                     "phone" to phone
                 )
 
-                // Only upload if a new image was selected
+                // Handle Image Upload
                 if (selectedImageUri != null) {
                     val file = uriToFile(selectedImageUri!!)
                     if (file != null) {
                         val result = appwriteManager.uploadImage(bucketID, file)
-                        val newUrl = "https://fra.cloud.appwrite.io/v1/storage/buckets/$bucketID/files/${result.id}/view?project=$projectID"
+                        // Professional URL Construction
+                        val newUrl = "https://cloud.appwrite.io/v1/storage/buckets/$bucketID/files/${result.id}/view?project=$projectID"
                         updates["imageUrl"] = newUrl
                     }
                 }
 
-                // Update Realtime Database
+                // Push to Firebase
                 database.child(uid).updateChildren(updates).addOnSuccessListener {
-                    Toast.makeText(requireContext(), "Profile Updated Successfully", Toast.LENGTH_SHORT).show()
-                    findNavController().popBackStack()
+                    if (isAdded) {
+                        Toast.makeText(requireContext(), "Profile Updated", Toast.LENGTH_SHORT).show()
+                        findNavController().popBackStack()
+                    }
                 }.addOnFailureListener { e ->
                     resetButton(e.message)
                 }
 
             } catch (e: Exception) {
-                Log.e("UrbanFixError", "Error: ${e.message}")
+                Log.e("UrbanFixError", "Save Error: ${e.message}")
                 resetButton(e.message)
             }
         }
     }
 
     private fun resetButton(error: String?) {
+        if (!isAdded) return
         binding.btnSaveProfile.isEnabled = true
         binding.btnSaveProfile.text = "SAVE CHANGES"
         Toast.makeText(requireContext(), "Error: $error", Toast.LENGTH_SHORT).show()
@@ -148,11 +156,13 @@ class EditProfileFragment : Fragment() {
     private suspend fun uriToFile(uri: Uri): File? = withContext(Dispatchers.IO) {
         try {
             val inputStream = requireContext().contentResolver.openInputStream(uri)
-            val file = File(requireContext().cacheDir, "update_img_${System.currentTimeMillis()}.jpg")
+            val file = File(requireContext().cacheDir, "temp_img_${System.currentTimeMillis()}.jpg")
             val outputStream = FileOutputStream(file)
             inputStream?.use { input -> outputStream.use { output -> input.copyTo(output) } }
             file
-        } catch (e: Exception) { null }
+        } catch (e: Exception) {
+            null
+        }
     }
 
     override fun onDestroyView() {

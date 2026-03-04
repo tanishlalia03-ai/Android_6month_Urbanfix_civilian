@@ -1,4 +1,4 @@
-package com.example.urbanfix.Recyclerview
+package com.example.urbanfix.recyclerview
 
 import android.view.LayoutInflater
 import android.view.View

@@ -7,17 +7,17 @@
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.example.urbanfix.Bottomnavigation.Ui.HomeFragment"
+        android:name="com.example.urbanfix.bottomnavigation.ui.HomeFragment"
         android:label="Urbanfix" />
 
     <fragment
         android:id="@+id/navigation_report"
-        android:name="com.example.urbanfix.Bottomnavigation.Ui.ReportFragment"
+        android:name="com.example.urbanfix.bottomnavigation.ui.ReportFragment"
         android:label="Report" />
 
     <fragment
         android:id="@+id/navigation_complaints"
-        android:name="com.example.urbanfix.Bottomnavigation.Ui.ComplaintsFragment"
+        android:name="com.example.urbanfix.bottomnavigation.ui.ComplaintsFragment"
         android:label="Complaints" >
     <action
         android:id="@+id/action_complaints_to_viewDetail"
@@ -26,7 +26,7 @@
 
     <fragment
         android:id="@+id/navigation_profile"
-        android:name="com.example.urbanfix.Bottomnavigation.Ui.ProfileFragment"
+        android:name="com.example.urbanfix.bottomnavigation.ui.ProfileFragment"
         android:label="Profile" >
 
         <action
@@ -37,19 +37,19 @@
 
     <fragment
         android:id="@+id/navigation_settings"
-        android:name="com.example.urbanfix.Bottomnavigation.Ui.ui2.SettingFragment"
+        android:name="com.example.urbanfix.bottomnavigation.ui.ui2.SettingFragment"
         android:label="Settings"
         />
 
     <fragment
         android:id="@+id/navigation_edit_profile"
-        android:name="com.example.urbanfix.Bottomnavigation.Ui.ui2.EditProfileFragment"
+        android:name="com.example.urbanfix.bottomnavigation.ui.ui2.EditProfileFragment"
         android:label="Edit Profile"
         tools:layout="@layout/fragment_editprofile" />
 
     <fragment
         android:id="@+id/navigation_view_detail"
-        android:name="com.example.urbanfix.Bottomnavigation.Ui.ui2.ViewdetailFragment"
+        android:name="com.example.urbanfix.bottomnavigation.ui.ui2.ViewdetailFragment"
         android:label="Complaint Details"
         tools:layout="@layout/fragment_viewdetail" />
 </navigation>

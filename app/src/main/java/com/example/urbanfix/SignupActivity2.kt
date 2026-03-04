@@ -9,8 +9,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.urbanfix.Appwrite.AppwriteManager
-import com.example.urbanfix.Firebase.UserModel
+import com.example.urbanfix.appwrite.AppwriteManager
+import com.example.urbanfix.firebase.UserModel
 import com.example.urbanfix.databinding.ActivitySignup2Binding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase

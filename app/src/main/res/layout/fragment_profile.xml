@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="24dp"
-        tools:context=".Bottomnavigation.Ui.ProfileFragment">
+        tools:context=".bottomnavigation.ui.ProfileFragment">
 
         <FrameLayout
             android:layout_width="wrap_content"
@@ -35,7 +35,7 @@
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
                     android:src="@drawable/ic_person"
-                    app:tint="?attr/colorPrimary" />
+                    />
             </com.google.android.material.card.MaterialCardView>
 
         </FrameLayout>

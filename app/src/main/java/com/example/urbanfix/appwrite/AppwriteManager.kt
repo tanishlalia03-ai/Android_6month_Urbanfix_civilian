@@ -1,4 +1,4 @@
-package com.example.urbanfix.Appwrite
+package com.example.urbanfix.appwrite
 
 import android.content.Context
 import io.appwrite.Client
@@ -8,7 +8,6 @@ import io.appwrite.models.InputFile
 import java.io.File
 
 class AppwriteManager private constructor(context: Context) {
-
     // 1. Initialize the Appwrite Client
     private val client = Client(context)
         .setEndpoint("https://fra.cloud.appwrite.io/v1")

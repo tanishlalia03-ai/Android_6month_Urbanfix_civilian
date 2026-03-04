@@ -1,4 +1,4 @@
-package com.example.urbanfix.Bottomnavigation.Ui.ui2
+package com.example.urbanfix.bottomnavigation.ui.ui2
 
 import android.content.Context
 import android.os.Bundle

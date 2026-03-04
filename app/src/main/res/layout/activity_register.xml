@@ -9,7 +9,7 @@
     android:orientation="vertical"
     android:padding="24dp"
     android:gravity="center"
-    tools:context=".Firebase.RegisterActivity">
+    tools:context=".firebase.RegisterActivity">
 
     <EditText
         android:id="@+id/emailET"

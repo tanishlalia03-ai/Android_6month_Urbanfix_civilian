@@ -1,4 +1,4 @@
-package com.example.urbanfix.Bottomnavigation.Ui
+package com.example.urbanfix.bottomnavigation.ui
 
 import android.graphics.Color
 import android.os.Bundle

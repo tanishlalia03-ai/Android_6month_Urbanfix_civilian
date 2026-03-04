@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="30dp"
-        tools:context=".Bottomnavigation.Ui.HomeFragment">
+        tools:context=".bottomnavigation.ui.HomeFragment">
 
         <RelativeLayout
             android:layout_width="match_parent"

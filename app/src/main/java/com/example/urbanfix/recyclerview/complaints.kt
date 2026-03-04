@@ -1,4 +1,4 @@
-package com.example.urbanfix.Recyclerview
+package com.example.urbanfix.recyclerview
 
 data class Complaint(
     val id: String,
