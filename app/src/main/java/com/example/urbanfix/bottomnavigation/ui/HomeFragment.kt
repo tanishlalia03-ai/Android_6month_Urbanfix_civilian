@@ -6,11 +6,15 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import com.example.urbanfix.R
+import com.example.urbanfix.firebase.UserModel // Ensure this import is correct
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 class HomeFragment : Fragment() {
 
@@ -24,20 +28,37 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Find the chart using the ID from your XML screenshot
+        // --- 1. Fetch and Set User Name ---
+        val tvUserName = view.findViewById<TextView>(R.id.tv_user_name)
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+
+        if (userId != null) {
+            val dbRef = FirebaseDatabase.getInstance().getReference("Users").child(userId)
+            dbRef.get().addOnSuccessListener { snapshot ->
+                if (snapshot.exists()) {
+                    // This maps the Firebase data directly to your UserModel class
+                    val user = snapshot.getValue(UserModel::class.java)
+                    if (user != null && !user.name.isNullOrEmpty()) {
+                        tvUserName.text = user.name
+                    }
+                }
+            }.addOnFailureListener {
+                tvUserName.text = "User"
+            }
+        }
+
+        // --- 2. PieChart Setup (Kept exactly as your original) ---
         val pieChart = view.findViewById<PieChart>(R.id.complaintsPieChart)
 
-        // 1. Set up entries matching your summary card numbers
         val entries = ArrayList<PieEntry>()
         entries.add(PieEntry(5f, "Pending"))
         entries.add(PieEntry(3f, "Progress"))
         entries.add(PieEntry(12f, "Completed"))
 
-        // 2. Set colors to match your UI (Red, Green, Cyan)
         val colors = arrayListOf(
-            Color.parseColor("#F44336"), // Red for Pending
-            Color.parseColor("#4CAF50"), // Green for Progress
-            Color.parseColor("#00BCD4")  // Cyan for Completed
+            Color.parseColor("#F44336"), // Red
+            Color.parseColor("#4CAF50"), // Green
+            Color.parseColor("#00BCD4")  // Cyan
         )
 
         val dataSet = PieDataSet(entries, "")
@@ -45,16 +66,15 @@ class HomeFragment : Fragment() {
         dataSet.valueTextSize = 14f
         dataSet.valueTextColor = Color.WHITE
 
-        // 3. Final Chart Setup
         val pieData = PieData(dataSet)
         pieChart.data = pieData
         pieChart.apply {
             description.isEnabled = false
             centerText = "Summary"
             setCenterTextSize(16f)
-            setHoleRadius(50f) // Makes it look like a nice ring
-            animateY(1200)     // Smooth entry animation
-            invalidate()       // Refresh the view
+            setHoleRadius(50f)
+            animateY(1200)
+            invalidate()
         }
     }
 }

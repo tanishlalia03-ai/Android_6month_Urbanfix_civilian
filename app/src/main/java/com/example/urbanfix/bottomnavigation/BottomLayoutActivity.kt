@@ -9,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -34,27 +35,28 @@ class BottomLayoutActivity : AppCompatActivity() {
         }
         AppCompatDelegate.setDefaultNightMode(mode)
 
-        // --- 2. FONT SIZE LOGIC ---
+        // --- 2. FONT SIZE & STYLE LOGIC ---
+        // We set the theme based on preferences. Note: In Android, only one
+        // setTheme() can be active, so we pick the most specific one.
         val fontSize = sharedPref.getString("font_size_key", "Medium")
-        when (fontSize) {
-            "Small" -> setTheme(R.style.Theme_Urbanfix_Small)
-            "Large" -> setTheme(R.style.Theme_Urbanfix_Large)
-            else -> setTheme(R.style.Theme_Urbanfix_Medium)
-        }
-
-        // --- 3. FONT STYLE LOGIC (Corrected) ---
         val fontStyleIndex = sharedPref.getInt("font_style_index", 0)
-        when (fontStyleIndex) {
-            1 -> setTheme(R.style.Theme_Urbanfix_Serif)
-            2 -> setTheme(R.style.Theme_Urbanfix_Mono)
-            else -> setTheme(R.style.Theme_Urbanfix_Sans)
+
+        when {
+            fontSize == "Small" -> setTheme(R.style.Theme_Urbanfix_Small)
+            fontSize == "Large" -> setTheme(R.style.Theme_Urbanfix_Large)
+            fontStyleIndex == 1 -> setTheme(R.style.Theme_Urbanfix_Serif)
+            fontStyleIndex == 2 -> setTheme(R.style.Theme_Urbanfix_Mono)
+            else -> setTheme(R.style.Theme_Urbanfix_Medium)
         }
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_bottom_layout)
 
-        // --- Rest of your UI Setup (Untouched) ---
+
+        window.statusBarColor = getColor(R.color.blue_main)
+        WindowCompat.getInsetsController(window,window.decorView).isAppearanceLightStatusBars = false
+
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
@@ -71,7 +73,6 @@ class BottomLayoutActivity : AppCompatActivity() {
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNavigationView.setupWithNavController(navController)
 
-        // Hides Bottom Navigation when in Settings
         navController.addOnDestinationChangedListener { _, destination, _ ->
             if (destination.id == R.id.navigation_settings) {
                 bottomNavigationView.visibility = View.GONE

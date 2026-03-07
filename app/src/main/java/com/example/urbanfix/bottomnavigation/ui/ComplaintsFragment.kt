@@ -13,7 +13,6 @@ import com.example.urbanfix.recyclerview.ComplaintAdapter
 import com.google.android.material.chip.ChipGroup
 
 class ComplaintsFragment : Fragment() {
-
     private var adapter: ComplaintAdapter? = null
     private val displayedList = mutableListOf<Complaint>()
 

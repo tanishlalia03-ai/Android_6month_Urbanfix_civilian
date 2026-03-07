@@ -17,8 +17,8 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/blue"
-            app:titleTextColor="@color/black" />
+            android:background="?attr/colorPrimary"
+            app:titleTextColor="@color/white" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.fragment.app.FragmentContainerView
@@ -40,7 +40,8 @@
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
         app:menu="@menu/bottom_menu"
-        app:itemTextColor="@color/black"
+        app:itemTextColor="@color/white"
+        app:itemIconTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />

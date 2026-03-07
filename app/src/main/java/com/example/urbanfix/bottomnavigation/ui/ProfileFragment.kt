@@ -22,7 +22,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentProfileBinding.bind(view)
 
-        // Load data from Firebase & Appwrite
+        // Load data from Firebase
         loadUserData()
 
         // 1. Navigate to Edit Profile Fragment
@@ -41,8 +41,12 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private fun loadUserData() {
         val uid = auth.currentUser?.uid ?: return
 
+        // --- ADDED VISIBILITY LOGIC START ---
+        binding.profileProgressBar.visibility = View.VISIBLE
+        binding.profileScrollView.visibility = View.INVISIBLE
+        // --- ADDED VISIBILITY LOGIC END ---
+
         database.child(uid).get().addOnSuccessListener { snapshot ->
-            // Safety check: ensure fragment is still attached to activity
             if (!isAdded) return@addOnSuccessListener
 
             val user = snapshot.getValue(UserModel::class.java)
@@ -52,22 +56,29 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 binding.tvProfileEmail.text = user.email ?: "No Email"
                 binding.tvProfilePhone.text = user.phone ?: "No Phone"
 
-                // FIX: Check if imageUrl is valid and use a cleaner Glide call
                 val imagePath = user.imageUrl
                 if (!imagePath.isNullOrEmpty()) {
-                    Glide.with(requireContext()) // Use requireContext() for better stability
+                    Glide.with(requireContext())
                         .load(imagePath)
                         .placeholder(R.drawable.ic_person)
-                        .error(R.drawable.ic_apple) // This shows if the URL is broken or unauthorized
+                        .error(R.drawable.ic_person)
                         .circleCrop()
                         .into(binding.ivProfileDisplay)
                 } else {
-                    // If no image, set default placeholder
                     binding.ivProfileDisplay.setImageResource(R.drawable.ic_person)
                 }
             }
+
+            // --- HIDE PROGRESS BAR & SHOW CONTENT ---
+            binding.profileProgressBar.visibility = View.GONE
+            binding.profileScrollView.visibility = View.VISIBLE
+
         }.addOnFailureListener { e ->
             if (isAdded) {
+                // --- HIDE PROGRESS BAR ON ERROR ---
+                binding.profileProgressBar.visibility = View.GONE
+                binding.profileScrollView.visibility = View.VISIBLE
+
                 Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
