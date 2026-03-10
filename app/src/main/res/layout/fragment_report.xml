@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="16dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -20,208 +20,210 @@
             android:textColor="?attr/colorOnSurface"
             android:textSize="28sp"
             android:textStyle="bold"
-            android:layout_marginBottom="24dp"/>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="      Select Category"
-            app:startIconTint="?attr/colorPrimary"
-            app:startIconDrawable="@drawable/ic_category">
-
-            <AutoCompleteTextView
-                android:id="@+id/categorySpinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="none" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="     Issue Title"
-            app:startIconTint="?attr/colorPrimary"
-            app:startIconDrawable="@drawable/ic_edit">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textCapSentences" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="Describe the problem">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etDescription"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="top"
-                android:inputType="textMultiLine"
-                android:lines="4" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Timeline"
-            android:layout_marginTop="24dp"
-            android:textStyle="bold"
-            android:textColor="?attr/colorPrimary" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal"
-            android:weightSum="2">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnPickDate"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="4dp"
-                android:text="Date"
-                app:icon="@drawable/ic_calendar" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnPickTime"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="4dp"
-                android:text="Time"
-                app:icon="@drawable/ic_timer" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/tvSelectedDateTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Not selected"
-            android:textSize="12sp"
-            android:layout_marginTop="4dp"
-            android:textColor="?attr/colorOnSurfaceVariant" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Location"
-            android:layout_marginTop="24dp"
-            android:textStyle="bold"
-            android:textColor="?attr/colorPrimary" />
-
-        <com.google.android.material.button.MaterialButtonToggleGroup
-            android:id="@+id/locationToggleGroup"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:singleSelection="true"
-            app:selectionRequired="true">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnCurrentLoc"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="GPS"
-                app:icon="@android:drawable/ic_menu_mylocation" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnManualLoc"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Manual"
-                app:icon="@android:drawable/ic_menu_edit" />
-        </com.google.android.material.button.MaterialButtonToggleGroup>
-
-        <TextView
-            android:id="@+id/tvSelectedLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Location not set"
-            android:textSize="12sp"
-            android:layout_marginTop="4dp"
-            android:textColor="?attr/colorOnSurfaceVariant" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Attachments"
-            android:layout_marginTop="24dp"
-            android:textStyle="bold"
-            android:textColor="?attr/colorPrimary" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal"
-            android:weightSum="2">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnCamera"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="4dp"
-                android:text="Camera"
-                app:icon="@android:drawable/ic_menu_camera" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnGallery"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="4dp"
-                android:text="Gallery"
-                app:icon="@android:drawable/ic_menu_gallery" />
-        </LinearLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvImagePreview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/item_image" />
+            android:layout_marginBottom="20dp"
+            android:layout_marginStart="4dp"/>
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="0dp"
-            app:strokeWidth="1dp"
-            app:strokeColor="?attr/colorOutlineVariant">
+            app:cardCornerRadius="16dp"
+            app:cardElevation="3dp"
+            app:strokeWidth="3dp"
+            app:strokeColor="@color/black"
+            app:cardBackgroundColor="?attr/colorSurface">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="12dp">
+                android:padding="20dp">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="      Select Category"
+                    app:startIconTint="?attr/colorPrimary"
+                    app:startIconDrawable="@drawable/ic_category">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/categorySpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:hint="     Issue Title"
+                    app:startIconTint="?attr/colorPrimary"
+                    app:startIconDrawable="@drawable/ic_edit">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapSentences" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:hint="Describe the problem">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etDescription"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="top"
+                        android:inputType="textMultiLine"
+                        android:lines="4" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Timeline"
+                    android:layout_marginTop="24dp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPickDate"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        android:text="Date"
+                        app:icon="@drawable/ic_calendar" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPickTime"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:text="Time"
+                        app:icon="@drawable/ic_timer" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvSelectedDateTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Not selected"
+                    android:textSize="12sp"
+                    android:layout_marginTop="4dp"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Location"
+                    android:layout_marginTop="24dp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary" />
+
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/locationToggleGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:singleSelection="true"
+                    app:selectionRequired="true">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCurrentLoc"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="GPS"
+                        app:icon="@android:drawable/ic_menu_mylocation" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnManualLoc"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Manual"
+                        app:icon="@android:drawable/ic_menu_edit" />
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                <TextView
+                    android:id="@+id/tvSelectedLocation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Location not set"
+                    android:textSize="12sp"
+                    android:layout_marginTop="4dp"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Attachments"
+                    android:layout_marginTop="24dp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCamera"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        android:text="Camera"
+                        app:icon="@android:drawable/ic_menu_camera" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnGallery"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:text="Gallery"
+                        app:icon="@android:drawable/ic_menu_gallery" />
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvImagePreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/item_image" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Priority Level"
+                    android:layout_marginTop="24dp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface" />
 
@@ -256,7 +258,7 @@
             android:id="@+id/btnSubmit"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="24dp"
             android:layout_marginBottom="16dp"
             android:text="Submit Report"
             android:textSize="16sp"

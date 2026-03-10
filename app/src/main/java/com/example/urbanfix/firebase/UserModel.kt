@@ -9,5 +9,6 @@ data class UserModel(
     val deviceToken: String? = null,
     val role: String? = null,
     val time: Long? = null,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val idProofUrl: String? = null
 )

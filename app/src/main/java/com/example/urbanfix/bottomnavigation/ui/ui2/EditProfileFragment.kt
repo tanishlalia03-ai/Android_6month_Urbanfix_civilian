@@ -18,11 +18,7 @@ import com.example.urbanfix.R
 import com.example.urbanfix.databinding.FragmentEditprofileBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
 
 class EditProfileFragment : Fragment() {
     private var _binding: FragmentEditprofileBinding? = null
@@ -31,17 +27,15 @@ class EditProfileFragment : Fragment() {
     private val auth = FirebaseAuth.getInstance()
     private val database = FirebaseDatabase.getInstance().getReference("Users")
 
-    // Constants
+    // Appwrite Details
     private val bucketID = "6996dc680036b04ee5f0"
-    private val projectID = "6996dc3e00250d7ae563"
-
     private val appwriteManager by lazy { AppwriteManager.getInstance(requireContext().applicationContext) }
+
     private var selectedImageUri: Uri? = null
 
     private val imagePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
             selectedImageUri = it
-            // Immediate UI feedback using Glide for proper cropping
             Glide.with(requireContext())
                 .load(it)
                 .circleCrop()
@@ -101,12 +95,10 @@ class EditProfileFragment : Fragment() {
         val phone = binding.etEditMobile.text.toString().trim()
         val uid = auth.currentUser?.uid ?: return
 
-        // Validation
         if (name.isEmpty()) { binding.etEditName.error = "Required"; return }
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) { binding.etEditEmail.error = "Invalid Email"; return }
         if (phone.length != 10) { binding.etEditMobile.error = "10 digits required"; return }
 
-        // Progress UI
         binding.btnSaveProfile.isEnabled = false
         binding.btnSaveProfile.text = "Updating..."
 
@@ -118,14 +110,14 @@ class EditProfileFragment : Fragment() {
                     "phone" to phone
                 )
 
-                // Handle Image Upload
+                // PROFESSIONAL ONE-LINE UPLOAD
                 if (selectedImageUri != null) {
-                    val file = uriToFile(selectedImageUri!!)
-                    if (file != null) {
-                        val result = appwriteManager.uploadImage(bucketID, file)
-                        // Professional URL Construction
-                        val newUrl = "https://cloud.appwrite.io/v1/storage/buckets/$bucketID/files/${result.id}/view?project=$projectID"
-                        updates["imageUrl"] = newUrl
+                    val newImageUrl = appwriteManager.uploadAndGetUrl(requireContext(), bucketID, selectedImageUri!!)
+                    if (newImageUrl != null) {
+                        updates["imageUrl"] = newImageUrl
+                    } else {
+                        Toast.makeText(requireContext(), "Image upload failed", Toast.LENGTH_SHORT).show()
+                        // Decide if you want to stop here or continue updating text data
                     }
                 }
 
@@ -151,18 +143,6 @@ class EditProfileFragment : Fragment() {
         binding.btnSaveProfile.isEnabled = true
         binding.btnSaveProfile.text = "SAVE CHANGES"
         Toast.makeText(requireContext(), "Error: $error", Toast.LENGTH_SHORT).show()
-    }
-
-    private suspend fun uriToFile(uri: Uri): File? = withContext(Dispatchers.IO) {
-        try {
-            val inputStream = requireContext().contentResolver.openInputStream(uri)
-            val file = File(requireContext().cacheDir, "temp_img_${System.currentTimeMillis()}.jpg")
-            val outputStream = FileOutputStream(file)
-            inputStream?.use { input -> outputStream.use { output -> input.copyTo(output) } }
-            file
-        } catch (e: Exception) {
-            null
-        }
     }
 
     override fun onDestroyView() {

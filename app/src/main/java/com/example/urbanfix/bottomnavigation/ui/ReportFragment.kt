@@ -45,12 +45,15 @@ class ReportFragment : Fragment() {
 
     private val selectedImagesList = ArrayList<Uri>()
     private lateinit var imageAdapter: ImagePreviewAdapter
+    private val appwriteManager by lazy { AppwriteManager.getInstance(requireContext()) }
 
     private var selectedDate: String = ""
     private var selectedTime: String = ""
     private var latitude: Double = 0.0
     private var longitude: Double = 0.0
     private var tempCameraUri: Uri? = null
+
+    private val bucketID = "6996dc680036b04ee5f0"
 
     // --- LAUNCHERS ---
 
@@ -62,7 +65,6 @@ class ReportFragment : Fragment() {
         if (success) tempCameraUri?.let { addImageToList(it) }
     }
 
-    // Permission Launcher for Camera
     private val requestCameraPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
         if (isGranted) openCamera() else Toast.makeText(context, "Camera permission denied", Toast.LENGTH_SHORT).show()
     }
@@ -83,7 +85,6 @@ class ReportFragment : Fragment() {
 
         binding.btnGallery.setOnClickListener { pickImageLauncher.launch("image/*") }
 
-        // Fixed Camera Click
         binding.btnCamera.setOnClickListener {
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                 openCamera()
@@ -101,10 +102,7 @@ class ReportFragment : Fragment() {
     private fun openCamera() {
         try {
             val photoFile = File(requireContext().cacheDir, "IMG_${System.currentTimeMillis()}.jpg")
-
-            // Match the authority with your Manifest's ${applicationId}.fileprovider
             val authority = "${requireContext().applicationContext.packageName}.fileprovider"
-
             tempCameraUri = FileProvider.getUriForFile(requireContext(), authority, photoFile)
             takePhotoLauncher.launch(tempCameraUri)
         } catch (e: Exception) {
@@ -112,7 +110,6 @@ class ReportFragment : Fragment() {
         }
     }
 
-    // --- EXISTING UTILITIES ---
     private fun setupRecyclerView() {
         imageAdapter = ImagePreviewAdapter(selectedImagesList)
         binding.rvImagePreview.apply {
@@ -206,13 +203,13 @@ class ReportFragment : Fragment() {
         val issueType = binding.categorySpinner.text.toString()
         val civilianId = FirebaseAuth.getInstance().currentUser?.uid
 
-        // Get Priority from RadioGroup
         val priority = when (binding.urgencyRadioGroup.checkedRadioButtonId) {
             R.id.radioHigh -> 2
             R.id.radioMedium -> 1
             else -> 0
         }
 
+        // Validation
         if (title.isEmpty()) { binding.etTitle.error = "Required"; return }
         if (selectedImagesList.isEmpty()) {
             Toast.makeText(context, "Please add at least one image", Toast.LENGTH_SHORT).show()
@@ -228,18 +225,17 @@ class ReportFragment : Fragment() {
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val appwriteManager = AppwriteManager.getInstance(requireContext())
                 val uploadedUrls = ArrayList<String>()
-                val bucketId = "6996dc680036b04ee5f0"
-                val projectId = "6996dc3e00250d7ae563"
 
+                // 1. Loop through and upload all images using the refined Manager
                 selectedImagesList.forEach { uri ->
-                    val file = appwriteManager.getFileFromUri(requireContext(), uri)
-                    if (file != null) {
-                        val uploadedFile = appwriteManager.uploadImage(bucketId, file)
-                        val fileUrl = "https://fra.cloud.appwrite.io/v1/storage/buckets/$bucketId/files/${uploadedFile.id}/view?project=$projectId"
-                        uploadedUrls.add(fileUrl)
-                    }
+                    val url = appwriteManager.uploadAndGetUrl(requireContext(), bucketID, uri)
+                    url?.let { uploadedUrls.add(it) }
+                }
+
+                // If some uploads failed, notify the user
+                if (uploadedUrls.size != selectedImagesList.size) {
+                    throw Exception("Failed to upload all images")
                 }
 
                 val complaint = ComplaintModel(
@@ -259,16 +255,23 @@ class ReportFragment : Fragment() {
                 val dbRef = FirebaseDatabase.getInstance().getReference("Complaints")
                 val complaintKey = dbRef.push().key ?: UUID.randomUUID().toString()
 
-                dbRef.child(complaintKey).setValue(complaint.copy(complaintId = complaintKey))
-                    .addOnSuccessListener {
-                        Toast.makeText(requireContext(), "Submitted Successfully!", Toast.LENGTH_LONG).show()
-                        requireActivity().onBackPressedDispatcher.onBackPressed()
-                    }
+                // 2. Final Firebase Save on Main Thread
+                withContext(Dispatchers.Main) {
+                    dbRef.child(complaintKey).setValue(complaint.copy(complaintId = complaintKey))
+                        .addOnSuccessListener {
+                            Toast.makeText(requireContext(), "Report Submitted!", Toast.LENGTH_LONG).show()
+                            requireActivity().onBackPressedDispatcher.onBackPressed()
+                        }
+                        .addOnFailureListener {
+                            binding.btnSubmit.isEnabled = true
+                            Toast.makeText(requireContext(), "Database Error: ${it.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
 
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     binding.btnSubmit.isEnabled = true
-                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Submission Error: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }

@@ -10,9 +10,13 @@ import java.io.File
 import java.io.FileOutputStream
 
 class AppwriteManager private constructor(context: Context) {
+
+    private val endpoint = "https://fra.cloud.appwrite.io/v1"
+    private val projectId = "6996dc3e00250d7ae563"
+
     private val client = Client(context)
-        .setEndpoint("https://fra.cloud.appwrite.io/v1")
-        .setProject("6996dc3e00250d7ae563")
+        .setEndpoint(endpoint)
+        .setProject(projectId)
 
     private val storage = Storage(client)
 
@@ -29,29 +33,41 @@ class AppwriteManager private constructor(context: Context) {
         }
     }
 
-    // Existing upload function
-    suspend fun uploadImage(bucketId: String, file: File): io.appwrite.models.File {
-        return storage.createFile(
-            bucketId = bucketId,
-            fileId = ID.unique(),
-            file = InputFile.fromFile(file)
-        )
-    }
-
-    // NEW HELPER: Converts Uri to File without touching other code
-    fun getFileFromUri(context: Context, uri: Uri): File? {
+    /**
+     * THE ALL-IN-ONE FUNCTION
+     * 1. Converts Uri to File
+     * 2. Uploads to Appwrite
+     * 3. Returns the final Viewable URL
+     */
+    suspend fun uploadAndGetUrl(context: Context, bucketId: String, uri: Uri): String? {
         return try {
-            val inputStream = context.contentResolver.openInputStream(uri)
-            val tempFile = File(context.cacheDir, "temp_${System.currentTimeMillis()}.jpg")
-            val outputStream = FileOutputStream(tempFile)
-            inputStream?.use { input ->
-                outputStream.use { output ->
-                    input.copyTo(output)
-                }
-            }
-            tempFile
+            // Step 1: Conversion
+            val file = getFileFromUri(context, uri) ?: return null
+
+            // Step 2: Upload
+            val uploadedFile = storage.createFile(
+                bucketId = bucketId,
+                fileId = ID.unique(),
+                file = InputFile.fromFile(file)
+            )
+
+            // Step 3: URL Generation
+            "$endpoint/storage/buckets/$bucketId/files/${uploadedFile.id}/view?project=$projectId"
         } catch (e: Exception) {
+            e.printStackTrace()
             null
         }
+    }
+
+    // Keep this private as it's now handled by the function above
+    private fun getFileFromUri(context: Context, uri: Uri): File? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+            val tempFile = File(context.cacheDir, "upload_${System.currentTimeMillis()}.jpg")
+            FileOutputStream(tempFile).use { output ->
+                inputStream.use { input -> input.copyTo(output) }
+            }
+            tempFile
+        } catch (e: Exception) { null }
     }
 }

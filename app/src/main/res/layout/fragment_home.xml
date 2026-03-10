@@ -117,7 +117,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Pending"
-                        android:textColor="@color/black"
+                        android:textColor="@color/white"
                         android:textSize="?android:attr/textSize"/>
                 </LinearLayout>
 
@@ -140,7 +140,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Progress"
-                        android:textColor="@color/black"
+                        android:textColor="@color/white"
                         android:textSize="?android:attr/textSize" />
                 </LinearLayout>
 
@@ -163,7 +163,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Completed"
-                        android:textColor="@color/black"
+                        android:textColor="@color/white"
                         android:textSize="?android:attr/textSize" />
                 </LinearLayout>
             </LinearLayout>
@@ -181,8 +181,9 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="20dp"
             app:cardCornerRadius="20dp"
-            app:cardElevation="2dp"
-            app:strokeWidth="0dp">
+            app:cardElevation="5dp"
+            app:strokeWidth="2dp"
+            app:strokeColor="@color/black">
 
             <ImageView
                 android:layout_width="match_parent"
