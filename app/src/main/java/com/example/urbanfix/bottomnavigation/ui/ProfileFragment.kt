@@ -2,6 +2,7 @@ package com.example.urbanfix.bottomnavigation.ui
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -9,6 +10,7 @@ import com.bumptech.glide.Glide
 import com.example.urbanfix.firebase.UserModel
 import com.example.urbanfix.R
 import com.example.urbanfix.databinding.FragmentProfileBinding
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
@@ -30,12 +32,33 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             findNavController().navigate(R.id.action_navigation_profile_to_editProfileFragment)
         }
 
-        // 2. Logout Logic
+        // 2. Logout Logic (Updated to show Bottom Sheet)
         binding.btnLogout.setOnClickListener {
+            showLogoutBottomSheet()
+        }
+    }
+
+    private fun showLogoutBottomSheet() {
+        val dialog = BottomSheetDialog(requireContext())
+        // Ensure you have created the layout_logout_bottom_sheet.xml first!
+        val view = layoutInflater.inflate(R.layout.layout_logout_bottom_sheet, null)
+
+        val btnConfirm = view.findViewById<Button>(R.id.btn_confirm_logout)
+        val btnCancel = view.findViewById<Button>(R.id.btn_cancel_logout)
+
+        btnConfirm.setOnClickListener {
+            dialog.dismiss()
             auth.signOut()
             Toast.makeText(requireContext(), "Logged Out Successfully", Toast.LENGTH_SHORT).show()
             requireActivity().finish()
         }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.setContentView(view)
+        dialog.show()
     }
 
     private fun loadUserData() {
