@@ -67,7 +67,6 @@ class SignupActivity2 : AppCompatActivity() {
             profilePicker.launch("image/*")
         }
 
-        // Make sure you have a button or view in XML with ID: btnSelectIdProof
         binding.btnSelectIdProof.setOnClickListener {
             idProofPicker.launch("image/*")
         }

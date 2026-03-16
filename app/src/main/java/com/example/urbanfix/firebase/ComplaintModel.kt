@@ -20,4 +20,10 @@ data class ComplaintModel(
     var latitude: Double ?= 0.0,
     var longitude: Double ?= 0.0
 
-)
+){
+    // ADD THIS: Explicit empty constructor for Firebase
+    constructor() : this(
+        null, null, null, null, null, ArrayList(),
+        null, null, null, null, 0, null, 0, 0.0, 0.0
+    )
+}

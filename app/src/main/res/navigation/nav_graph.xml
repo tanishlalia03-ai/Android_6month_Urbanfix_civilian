@@ -19,27 +19,24 @@
         android:id="@+id/navigation_complaints"
         android:name="com.example.urbanfix.bottomnavigation.ui.ComplaintsFragment"
         android:label="Complaints" >
-    <action
-        android:id="@+id/action_complaints_to_viewDetail"
-        app:destination="@id/navigation_view_detail" />
+        <action
+            android:id="@+id/action_complaints_to_viewDetail"
+            app:destination="@id/navigation_view_detail" />
     </fragment>
 
     <fragment
         android:id="@+id/navigation_profile"
         android:name="com.example.urbanfix.bottomnavigation.ui.ProfileFragment"
         android:label="Profile" >
-
         <action
             android:id="@+id/action_navigation_profile_to_editProfileFragment"
-            app:destination="@id/navigation_edit_profile"
-            />
+            app:destination="@id/navigation_edit_profile" />
     </fragment>
 
     <fragment
         android:id="@+id/navigation_settings"
         android:name="com.example.urbanfix.bottomnavigation.ui.ui2.SettingFragment"
-        android:label="Settings"
-        />
+        android:label="Settings" />
 
     <fragment
         android:id="@+id/navigation_edit_profile"
@@ -51,5 +48,12 @@
         android:id="@+id/navigation_view_detail"
         android:name="com.example.urbanfix.bottomnavigation.ui.ui2.ViewdetailFragment"
         android:label="Complaint Details"
-        tools:layout="@layout/fragment_viewdetail" />
+        tools:layout="@layout/fragment_viewdetail">
+
+        <argument
+            android:name="complaintId"
+            app:argType="string"
+            android:defaultValue="N/A" />
+
+    </fragment>
 </navigation>
