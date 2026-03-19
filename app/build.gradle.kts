@@ -93,4 +93,10 @@ dependencies {
 
     //Location
     implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    //google ml kit
+    implementation("com.google.mlkit:language-id:17.0.6")
+    implementation("org.tensorflow:tensorflow-lite:2.14.0")
+    implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
+    implementation("org.tensorflow:tensorflow-lite-task-text:0.4.4")
 }

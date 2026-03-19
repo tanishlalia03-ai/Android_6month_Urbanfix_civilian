@@ -15,7 +15,7 @@ import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.example.urbanfix.appwrite.AppwriteManager
 import com.example.urbanfix.R
-import com.example.urbanfix.databinding.FragmentEditprofileBinding
+import com.example.urbanfix.databinding.FragmentEditprofileBinding // Ensure this matches your XML filename
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.launch
@@ -39,7 +39,7 @@ class EditProfileFragment : Fragment() {
             Glide.with(requireContext())
                 .load(it)
                 .circleCrop()
-                .into(binding.ivProfilePicture)
+                .into(binding.ivEditProfilePicture) // Updated ID to match our previous XML
         }
     }
 
@@ -53,7 +53,7 @@ class EditProfileFragment : Fragment() {
 
         fetchExistingData()
 
-        binding.btnEditImage.setOnClickListener {
+        binding.btnChangeImage.setOnClickListener {
             imagePicker.launch("image/*")
         }
 
@@ -65,13 +65,17 @@ class EditProfileFragment : Fragment() {
     private fun fetchExistingData() {
         val uid = auth.currentUser?.uid ?: return
         database.child(uid).get().addOnSuccessListener { snapshot ->
-            if (!isAdded) return@addOnSuccessListener
+            if (_binding == null || !isAdded) return@addOnSuccessListener
 
             if (snapshot.exists()) {
                 binding.apply {
                     etEditName.setText(snapshot.child("name").value?.toString() ?: "")
                     etEditEmail.setText(snapshot.child("email").value?.toString() ?: "")
                     etEditMobile.setText(snapshot.child("phone").value?.toString() ?: "")
+
+                    // NEW: Load Address and Role
+                    etEditAddress.setText(snapshot.child("address").value?.toString() ?: "")
+                    etEditRole.setText(snapshot.child("role").value?.toString()?.uppercase() ?: "USER")
 
                     val img = snapshot.child("imageUrl").value?.toString()
                     if (!img.isNullOrEmpty()) {
@@ -80,7 +84,7 @@ class EditProfileFragment : Fragment() {
                             .placeholder(R.drawable.ic_person)
                             .error(R.drawable.ic_person)
                             .circleCrop()
-                            .into(ivProfilePicture)
+                            .into(ivEditProfilePicture)
                     }
                 }
             }
@@ -93,38 +97,43 @@ class EditProfileFragment : Fragment() {
         val name = binding.etEditName.text.toString().trim()
         val email = binding.etEditEmail.text.toString().trim()
         val phone = binding.etEditMobile.text.toString().trim()
+        val address = binding.etEditAddress.text.toString().trim() // NEW
         val uid = auth.currentUser?.uid ?: return
 
+        // Validation
         if (name.isEmpty()) { binding.etEditName.error = "Required"; return }
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) { binding.etEditEmail.error = "Invalid Email"; return }
         if (phone.length != 10) { binding.etEditMobile.error = "10 digits required"; return }
+        if (address.isEmpty()) { binding.etEditAddress.error = "Address required"; return }
 
+        // UI State
         binding.btnSaveProfile.isEnabled = false
         binding.btnSaveProfile.text = "Updating..."
 
         lifecycleScope.launch {
             try {
+                // Prepare Updates Map
                 val updates = mutableMapOf<String, Any>(
                     "name" to name,
                     "email" to email,
-                    "phone" to phone
+                    "phone" to phone,
+                    "address" to address // NEW
                 )
 
-                // PROFESSIONAL ONE-LINE UPLOAD
+                // Handle Image Upload with Appwrite
                 if (selectedImageUri != null) {
                     val newImageUrl = appwriteManager.uploadAndGetUrl(requireContext(), bucketID, selectedImageUri!!)
                     if (newImageUrl != null) {
                         updates["imageUrl"] = newImageUrl
                     } else {
-                        Toast.makeText(requireContext(), "Image upload failed", Toast.LENGTH_SHORT).show()
-                        // Decide if you want to stop here or continue updating text data
+                        Log.e("UrbanFix", "Image upload returned null URL")
                     }
                 }
 
-                // Push to Firebase
+                // Update Firebase Database
                 database.child(uid).updateChildren(updates).addOnSuccessListener {
                     if (isAdded) {
-                        Toast.makeText(requireContext(), "Profile Updated", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Profile Updated Successfully", Toast.LENGTH_SHORT).show()
                         findNavController().popBackStack()
                     }
                 }.addOnFailureListener { e ->
@@ -139,7 +148,7 @@ class EditProfileFragment : Fragment() {
     }
 
     private fun resetButton(error: String?) {
-        if (!isAdded) return
+        if (!isAdded || _binding == null) return
         binding.btnSaveProfile.isEnabled = true
         binding.btnSaveProfile.text = "SAVE CHANGES"
         Toast.makeText(requireContext(), "Error: $error", Toast.LENGTH_SHORT).show()

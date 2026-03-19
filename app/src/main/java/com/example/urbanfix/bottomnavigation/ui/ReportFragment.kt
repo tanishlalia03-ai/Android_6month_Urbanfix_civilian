@@ -30,9 +30,11 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ServerValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.tensorflow.lite.task.text.nlclassifier.NLClassifier
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -55,8 +57,10 @@ class ReportFragment : Fragment() {
 
     private val bucketID = "6996dc680036b04ee5f0"
 
-    // --- LAUNCHERS ---
+    // Advanced AI Variable
+    private var textClassifier: NLClassifier? = null
 
+    // --- LAUNCHERS ---
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { addImageToList(it) }
     }
@@ -83,8 +87,16 @@ class ReportFragment : Fragment() {
         setupRecyclerView()
         setupCategoryDropdown()
 
-        binding.btnGallery.setOnClickListener { pickImageLauncher.launch("image/*") }
+        // Initialize Advanced AI in Background
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                textClassifier = NLClassifier.createFromFile(requireContext(), "text_classification.tflite")
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
 
+        binding.btnGallery.setOnClickListener { pickImageLauncher.launch("image/*") }
         binding.btnCamera.setOnClickListener {
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                 openCamera()
@@ -92,7 +104,6 @@ class ReportFragment : Fragment() {
                 requestCameraPermission.launch(Manifest.permission.CAMERA)
             }
         }
-
         binding.btnCurrentLoc.setOnClickListener { checkLocationPermissions() }
         binding.btnManualLoc.setOnClickListener { showManualLocationDialog() }
         setupDateTimePickers()
@@ -197,45 +208,87 @@ class ReportFragment : Fragment() {
         binding.tvSelectedDateTime.text = if (selectedDate.isNotEmpty()) "$selectedDate | $selectedTime" else selectedTime
     }
 
+    // --- HYBRID AI + MANUAL SUBMIT ---
     private fun handleSubmit() {
+        val title = binding.etTitle.text.toString().trim()
+        val description = binding.etDescription.text.toString().trim()
+
+        if (title.isEmpty()) { binding.etTitle.error = "Required"; return }
+        if (description.isEmpty()) { binding.etDescription.error = "Required"; return }
+
+        var isAbusive = false
+
+        // 1. Layer 1: AI Sentiment Moderation (Strict 0.4 Threshold)
+        textClassifier?.let { ai ->
+            val results = ai.classify(description)
+            val category = results.find {
+                it.label.contains("Negative", ignoreCase = true) ||
+                        it.label.contains("Toxic", ignoreCase = true)
+            }
+            if ((category?.score ?: 0f) > 0.4f) {
+                isAbusive = true
+            }
+        }
+
+        // 2. Layer 2: Manual Pattern Matching
+        if (!isAbusive && containsProhibitedWords(description)) {
+            isAbusive = true
+        }
+
+        if (isAbusive) {
+            Toast.makeText(requireContext(),
+                "To keep our community helpful, please use professional language and then again submit.",
+                Toast.LENGTH_LONG).show()
+
+            binding.etDescription.error = "Please review your wording"
+            binding.etDescription.requestFocus()
+            return
+        }
+
+        startSubmissionProcess()
+    }
+
+    private fun containsProhibitedWords(text: String): Boolean {
+        val badWords = listOf(
+            "abuse", "idiot", "stupid", "fraud", "scam", "fucking", "bastard",
+            "shit", "bitch", "asshole", "piss", "dick", "pussy", "fake", "nonsense","useless", "dumb", "moron", "loser","liar", "corrupt", "bribe", "ghoos", "spam", "advertisement",
+            "f*ck", "sh*t", "a$$", "b*tch", "sc@m", "fr@ud"
+        )
+
+        val cleanInput = text.lowercase(Locale.getDefault())
+            .replace(" ", "")
+            .replace(".", "")
+            .replace("*", "")
+            .replace("-", "")
+            .replace("_", "")
+            .replace("@", "a")
+            .replace("0", "o")
+            .replace("1", "i")
+
+        return badWords.any { cleanInput.contains(it) }
+    }
+
+    private fun startSubmissionProcess() {
         val title = binding.etTitle.text.toString().trim()
         val description = binding.etDescription.text.toString().trim()
         val issueType = binding.categorySpinner.text.toString()
         val civilianId = FirebaseAuth.getInstance().currentUser?.uid
+        val priority = if (binding.urgencyRadioGroup.checkedRadioButtonId == R.id.radioHigh) 2 else 1
 
-        val priority = when (binding.urgencyRadioGroup.checkedRadioButtonId) {
-            R.id.radioHigh -> 2
-            R.id.radioMedium -> 1
-            else -> 0
-        }
-
-        // Validation
-        if (title.isEmpty()) { binding.etTitle.error = "Required"; return }
-        if (selectedImagesList.isEmpty()) {
-            Toast.makeText(context, "Please add at least one image", Toast.LENGTH_SHORT).show()
-            return
-        }
-        if (civilianId == null) {
-            Toast.makeText(context, "Please sign in to report", Toast.LENGTH_SHORT).show()
+        if (selectedImagesList.isEmpty() || civilianId == null) {
+            Toast.makeText(requireContext(), "Check images or login status", Toast.LENGTH_SHORT).show()
             return
         }
 
         binding.btnSubmit.isEnabled = false
-        Toast.makeText(context, "Uploading Report...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), "Verification Successful. Uploading...", Toast.LENGTH_SHORT).show()
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val uploadedUrls = ArrayList<String>()
-
-                // 1. Loop through and upload all images using the refined Manager
                 selectedImagesList.forEach { uri ->
                     val url = appwriteManager.uploadAndGetUrl(requireContext(), bucketID, uri)
                     url?.let { uploadedUrls.add(it) }
-                }
-
-                // If some uploads failed, notify the user
-                if (uploadedUrls.size != selectedImagesList.size) {
-                    throw Exception("Failed to upload all images")
                 }
 
                 val complaint = ComplaintModel(
@@ -253,25 +306,35 @@ class ReportFragment : Fragment() {
                 )
 
                 val dbRef = FirebaseDatabase.getInstance().getReference("Complaints")
+                val adminMsgRef = FirebaseDatabase.getInstance().getReference("AdminMessages")
                 val complaintKey = dbRef.push().key ?: UUID.randomUUID().toString()
 
-                // 2. Final Firebase Save on Main Thread
                 withContext(Dispatchers.Main) {
                     dbRef.child(complaintKey).setValue(complaint.copy(complaintId = complaintKey))
                         .addOnSuccessListener {
-                            Toast.makeText(requireContext(), "Report Submitted!", Toast.LENGTH_LONG).show()
+
+                            // --- ADMIN NOTIFICATION TRIGGER WITH LINKED ID ---
+                            val notificationData = mapOf(
+                                "title" to "New Report: $title",
+                                "body" to "A new $issueType report has been filed.",
+                                "complaintId" to complaintKey, // Links both root nodes
+                                "timestamp" to ServerValue.TIMESTAMP,
+                                "status" to "unread"
+                            )
+                            adminMsgRef.push().setValue(notificationData)
+
+                            Toast.makeText(requireContext(), "Report Submitted! Admin Notified.", Toast.LENGTH_LONG).show()
                             requireActivity().onBackPressedDispatcher.onBackPressed()
                         }
                         .addOnFailureListener {
                             binding.btnSubmit.isEnabled = true
-                            Toast.makeText(requireContext(), "Database Error: ${it.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "Database Error", Toast.LENGTH_SHORT).show()
                         }
                 }
-
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     binding.btnSubmit.isEnabled = true
-                    Toast.makeText(context, "Submission Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }

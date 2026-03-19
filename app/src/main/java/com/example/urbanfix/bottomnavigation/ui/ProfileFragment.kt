@@ -1,5 +1,6 @@
 package com.example.urbanfix.bottomnavigation.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -7,7 +8,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
-import com.example.urbanfix.firebase.UserModel
 import com.example.urbanfix.R
 import com.example.urbanfix.databinding.FragmentProfileBinding
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -16,13 +16,15 @@ import com.google.firebase.database.FirebaseDatabase
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
-    private lateinit var binding: FragmentProfileBinding
+    private var _binding: FragmentProfileBinding? = null
+    private val binding get() = _binding!!
+
     private val auth = FirebaseAuth.getInstance()
     private val database = FirebaseDatabase.getInstance().getReference("Users")
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding = FragmentProfileBinding.bind(view)
+        _binding = FragmentProfileBinding.bind(view)
 
         // Load data from Firebase
         loadUserData()
@@ -32,7 +34,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             findNavController().navigate(R.id.action_navigation_profile_to_editProfileFragment)
         }
 
-        // 2. Logout Logic (Updated to show Bottom Sheet)
+        // 2. Logout Logic
         binding.btnLogout.setOnClickListener {
             showLogoutBottomSheet()
         }
@@ -40,8 +42,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     private fun showLogoutBottomSheet() {
         val dialog = BottomSheetDialog(requireContext())
-        // Ensure you have created the layout_logout_bottom_sheet.xml first!
-        val view = layoutInflater.inflate(R.layout.layout_logout_bottom_sheet, null)
+        val view = layoutInflater.inflate(R.layout.layout_logout_bottom_sheet, null, false)
 
         val btnConfirm = view.findViewById<Button>(R.id.btn_confirm_logout)
         val btnCancel = view.findViewById<Button>(R.id.btn_cancel_logout)
@@ -50,6 +51,8 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             dialog.dismiss()
             auth.signOut()
             Toast.makeText(requireContext(), "Logged Out Successfully", Toast.LENGTH_SHORT).show()
+
+            // Close the current activity and return to Login
             requireActivity().finish()
         }
 
@@ -64,46 +67,58 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private fun loadUserData() {
         val uid = auth.currentUser?.uid ?: return
 
-        // --- ADDED VISIBILITY LOGIC START ---
+        // Show loading state
         binding.profileProgressBar.visibility = View.VISIBLE
         binding.profileScrollView.visibility = View.INVISIBLE
-        // --- ADDED VISIBILITY LOGIC END ---
 
         database.child(uid).get().addOnSuccessListener { snapshot ->
-            if (!isAdded) return@addOnSuccessListener
+            // Safety check: verify fragment is still attached to UI before updating views
+            if (_binding == null || !isAdded) return@addOnSuccessListener
 
-            val user = snapshot.getValue(UserModel::class.java)
+            // map snapshot to your UserModel
+            val name = snapshot.child("name").getValue(String::class.java)
+            val email = snapshot.child("email").getValue(String::class.java)
+            val phone = snapshot.child("phone").getValue(String::class.java)
+            val role = snapshot.child("role").getValue(String::class.java)
+            val address = snapshot.child("address").getValue(String::class.java)
+            val imagePath = snapshot.child("imageUrl").getValue(String::class.java)
 
-            if (user != null) {
-                binding.tvProfileName.text = user.name ?: "No Name"
-                binding.tvProfileEmail.text = user.email ?: "No Email"
-                binding.tvProfilePhone.text = user.phone ?: "No Phone"
+            // Update UI with Firebase Data
+            binding.apply {
+                tvHeaderName.text = name ?: "User Name"
+                tvProfileEmail.text = email ?: "No Email Provided"
+                tvProfilePhone.text = phone ?: "No Phone Provided"
 
-                val imagePath = user.imageUrl
+                // New Fields from the updated XML
+                tvProfileRole.text = role?.uppercase() ?: "USER"
+                tvProfileAddress.text = address ?: "No Address Added"
+
+                // Load Profile Image
                 if (!imagePath.isNullOrEmpty()) {
-                    Glide.with(requireContext())
+                    Glide.with(this@ProfileFragment)
                         .load(imagePath)
                         .placeholder(R.drawable.ic_person)
                         .error(R.drawable.ic_person)
                         .circleCrop()
-                        .into(binding.ivProfileDisplay)
-                } else {
-                    binding.ivProfileDisplay.setImageResource(R.drawable.ic_person)
+                        .into(ivProfileDisplay)
                 }
             }
 
-            // --- HIDE PROGRESS BAR & SHOW CONTENT ---
+            // Hide loading and show content
             binding.profileProgressBar.visibility = View.GONE
             binding.profileScrollView.visibility = View.VISIBLE
 
         }.addOnFailureListener { e ->
-            if (isAdded) {
-                // --- HIDE PROGRESS BAR ON ERROR ---
+            if (_binding != null && isAdded) {
                 binding.profileProgressBar.visibility = View.GONE
                 binding.profileScrollView.visibility = View.VISIBLE
-
                 Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null // Clear binding to prevent memory leaks
     }
 }

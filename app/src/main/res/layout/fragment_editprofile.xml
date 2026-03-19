@@ -42,15 +42,15 @@
                 app:layout_constraintEnd_toEndOf="parent">
 
                 <ImageView
-                    android:id="@+id/ivProfilePicture"
+                    android:id="@+id/ivEditProfilePicture"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/ic_person"
-                 /> </com.google.android.material.card.MaterialCardView>
+                    android:src="@drawable/ic_person" />
+            </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/btnEditImage"
+                android:id="@+id/btnChangeImage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:fabSize="mini"
@@ -61,25 +61,21 @@
                 app:layout_constraintEnd_toEndOf="@id/cardProfileImage"
                 android:layout_marginEnd="4dp"
                 android:layout_marginBottom="4dp" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="     Full Name"
+            android:hint="Full Name"
             app:startIconDrawable="@drawable/ic_person"
-            app:startIconTint="?attr/colorPrimary"
-            app:boxStrokeColor="?attr/colorPrimary"
-            app:hintTextColor="?attr/colorPrimary">
+            app:startIconTint="?attr/colorPrimary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEditName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPersonName"
-                android:textColor="?attr/colorOnSurface" />
+                android:inputType="textPersonName" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -87,11 +83,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="       Email Address"
+            android:hint="Email Address"
             app:startIconDrawable="@drawable/ic_mail"
-            app:startIconTint="?attr/colorPrimary"
-            app:boxStrokeColor="?attr/colorPrimary"
-            app:hintTextColor="?attr/colorPrimary">
+            app:startIconTint="?attr/colorPrimary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEditEmail"
@@ -105,11 +99,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="       Mobile Number"
+            android:hint="Mobile Number"
             app:startIconDrawable="@drawable/ic_phone"
-            app:startIconTint="?attr/colorPrimary"
-            app:boxStrokeColor="?attr/colorPrimary"
-            app:hintTextColor="?attr/colorPrimary">
+            app:startIconTint="?attr/colorPrimary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEditMobile"
@@ -118,10 +110,38 @@
                 android:inputType="phone" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <View
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="User Role"
+            app:startIconDrawable="@drawable/ic_person"
+            app:startIconTint="?attr/colorPrimary">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEditRole"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="Home Address"
+            app:startIconDrawable="@drawable/ic_location"
+            app:startIconTint="?attr/colorPrimary">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEditAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPostalAddress" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSaveProfile"
@@ -129,10 +149,8 @@
             android:layout_height="60dp"
             android:layout_marginTop="40dp"
             android:text="SAVE CHANGES"
-            android:textSize="?android:attr/textSize"
             android:textStyle="bold"
-            app:cornerRadius="16dp"
-            android:backgroundTint="?attr/colorPrimary" />
+            app:cornerRadius="16dp" />
 
     </LinearLayout>
 </ScrollView>

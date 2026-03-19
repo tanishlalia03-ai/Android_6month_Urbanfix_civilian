@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
 class ComplaintRepository {
-    // UPDATED: Changed "complaints" to "Complaints" to match your Firebase screenshot
     private val database = FirebaseDatabase.getInstance().getReference("Complaints")
 
     fun getLiveComplaints(): Flow<List<ComplaintModel>> = callbackFlow {
