@@ -1,156 +1,228 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="?android:attr/windowBackground">
+    android:background="#F8F9FA">
 
     <LinearLayout
+        android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="20dp"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Edit Profile"
-            android:textSize="24sp"
-            android:textColor="?attr/colorPrimary"
-            android:textStyle="bold"
-            android:layout_gravity="center"
-            android:layout_marginBottom="32dp" />
+            android:textColor="@color/black"
+            android:textSize="28sp"
+            android:textStyle="bold" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="32dp">
+            android:alpha="0.6"
+            android:text="Keep your contact details up to date"
+            android:textSize="14sp" />
+    </LinearLayout>
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardProfileImage"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                app:cardCornerRadius="60dp"
-                app:cardElevation="4dp"
-                app:strokeColor="?attr/colorPrimary"
-                app:strokeWidth="2dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/topBar">
 
-                <ImageView
-                    android:id="@+id/ivEditProfilePicture"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/ic_person" />
-            </com.google.android.material.card.MaterialCardView>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="32dp">
 
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/btnChangeImage"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:fabSize="mini"
-                app:srcCompat="@android:drawable/ic_menu_camera"
-                app:backgroundTint="?attr/colorPrimary"
-                app:tint="@color/white"
-                app:layout_constraintBottom_toBottomOf="@id/cardProfileImage"
-                app:layout_constraintEnd_toEndOf="@id/cardProfileImage"
-                android:layout_marginEnd="4dp"
-                android:layout_marginBottom="4dp" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                android:layout_gravity="center"
+                android:layout_marginVertical="24dp">
 
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Full Name"
-            app:startIconDrawable="@drawable/ic_person"
-            app:startIconTint="?attr/colorPrimary">
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardProfileImage"
+                    android:layout_width="110dp"
+                    android:layout_height="110dp"
+                    app:cardCornerRadius="55dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="?attr/colorPrimary"
+                    app:strokeWidth="2dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etEditName"
+                    <ImageView
+                        android:id="@+id/ivEditProfilePicture"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_person" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/btnChangeImage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:fabCustomSize="36dp"
+                    app:srcCompat="@android:drawable/ic_menu_camera"
+                    app:backgroundTint="?attr/colorPrimary"
+                    app:tint="@color/white"
+                    app:layout_constraintBottom_toBottomOf="@id/cardProfileImage"
+                    app:layout_constraintEnd_toEndOf="@id/cardProfileImage" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPersonName" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
 
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="Email Address"
-            app:startIconDrawable="@drawable/ic_mail"
-            app:startIconTint="?attr/colorPrimary">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etEditEmail"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Personal Details"
+                        android:textStyle="bold"
+                        android:textColor="?attr/colorPrimary"
+                        android:layout_marginBottom="16dp"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Full Name"
+                        app:startIconDrawable="@drawable/ic_person">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etEditName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="Mobile Number"
+                        app:startIconDrawable="@drawable/ic_phone">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etEditMobile"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="phone" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="Address"
+                        app:startIconDrawable="@drawable/ic_location">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etEditAddress"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textEmailAddress" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
 
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="Mobile Number"
-            app:startIconDrawable="@drawable/ic_phone"
-            app:startIconTint="?attr/colorPrimary">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etEditMobile"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Account Security"
+                        android:textStyle="bold"
+                        android:textColor="?attr/colorPrimary"
+                        android:layout_marginBottom="16dp"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Email Address"
+                        app:startIconDrawable="@drawable/ic_mail">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etEditEmail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:enabled="false" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <LinearLayout
+                        android:id="@+id/passwordLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        android:layout_marginTop="12dp">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="New Password"
+                            app:passwordToggleEnabled="true"
+                            app:startIconDrawable="@drawable/ic_lock">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etNewPassword"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textPassword" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnShowPasswordFields"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Change Password?"
+                        android:textColor="?attr/colorPrimary" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSaveProfile"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="phone" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_height="60dp"
+                android:text="SAVE CHANGES"
+                android:textStyle="bold"
+                app:cornerRadius="16dp" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="User Role"
-            app:startIconDrawable="@drawable/ic_person"
-            app:startIconTint="?attr/colorPrimary">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etEditRole"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:enabled="false"
-                android:inputType="none" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="Home Address"
-            app:startIconDrawable="@drawable/ic_location"
-            app:startIconTint="?attr/colorPrimary">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etEditAddress"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPostalAddress" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSaveProfile"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginTop="40dp"
-            android:text="SAVE CHANGES"
-            android:textStyle="bold"
-            app:cornerRadius="16dp" />
-
-    </LinearLayout>
-</ScrollView>
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

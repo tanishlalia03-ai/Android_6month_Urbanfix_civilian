@@ -3,7 +3,6 @@ package com.example.urbanfix.bottomnavigation.ui.ui2
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,12 +12,15 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
-import com.example.urbanfix.appwrite.AppwriteManager
 import com.example.urbanfix.R
-import com.example.urbanfix.databinding.FragmentEditprofileBinding // Ensure this matches your XML filename
+import com.example.urbanfix.appwrite.AppwriteManager
+import com.example.urbanfix.databinding.FragmentEditprofileBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.Locale
 
 class EditProfileFragment : Fragment() {
     private var _binding: FragmentEditprofileBinding? = null
@@ -39,7 +41,7 @@ class EditProfileFragment : Fragment() {
             Glide.with(requireContext())
                 .load(it)
                 .circleCrop()
-                .into(binding.ivEditProfilePicture) // Updated ID to match our previous XML
+                .into(binding.ivEditProfilePicture)
         }
     }
 
@@ -53,8 +55,21 @@ class EditProfileFragment : Fragment() {
 
         fetchExistingData()
 
+        // Image Picker
         binding.btnChangeImage.setOnClickListener {
             imagePicker.launch("image/*")
+        }
+
+        // --- NEW: Password Toggle Logic ---
+        binding.btnShowPasswordFields.setOnClickListener {
+            if (binding.passwordLayout.visibility == View.GONE) {
+                binding.passwordLayout.visibility = View.VISIBLE
+                binding.btnShowPasswordFields.text = "Keep current password"
+            } else {
+                binding.passwordLayout.visibility = View.GONE
+                binding.btnShowPasswordFields.text = "Change Password?"
+                binding.etNewPassword.text?.clear()
+            }
         }
 
         binding.btnSaveProfile.setOnClickListener {
@@ -72,77 +87,84 @@ class EditProfileFragment : Fragment() {
                     etEditName.setText(snapshot.child("name").value?.toString() ?: "")
                     etEditEmail.setText(snapshot.child("email").value?.toString() ?: "")
                     etEditMobile.setText(snapshot.child("phone").value?.toString() ?: "")
-
-                    // NEW: Load Address and Role
                     etEditAddress.setText(snapshot.child("address").value?.toString() ?: "")
-                    etEditRole.setText(snapshot.child("role").value?.toString()?.uppercase() ?: "USER")
+
+                    // Display role as read-only
+                    val role = snapshot.child("role").value?.toString()?.uppercase(Locale.getDefault()) ?: "USER"
+                    // Note: If etEditRole doesn't exist in your new card-based XML, remove this line
+                    // etEditRole.setText(role)
 
                     val img = snapshot.child("imageUrl").value?.toString()
                     if (!img.isNullOrEmpty()) {
                         Glide.with(requireContext())
                             .load(img)
                             .placeholder(R.drawable.ic_person)
-                            .error(R.drawable.ic_person)
                             .circleCrop()
                             .into(ivEditProfilePicture)
                     }
                 }
             }
-        }.addOnFailureListener {
-            if (isAdded) Toast.makeText(requireContext(), "Failed to load data", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun validateAndSave() {
         val name = binding.etEditName.text.toString().trim()
-        val email = binding.etEditEmail.text.toString().trim()
         val phone = binding.etEditMobile.text.toString().trim()
-        val address = binding.etEditAddress.text.toString().trim() // NEW
-        val uid = auth.currentUser?.uid ?: return
+        val address = binding.etEditAddress.text.toString().trim()
+        val newPassword = binding.etNewPassword.text.toString().trim()
+        val user = auth.currentUser
+        val uid = user?.uid ?: return
 
-        // Validation
+        // Basic Validation
         if (name.isEmpty()) { binding.etEditName.error = "Required"; return }
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) { binding.etEditEmail.error = "Invalid Email"; return }
-        if (phone.length != 10) { binding.etEditMobile.error = "10 digits required"; return }
+        if (phone.length < 10) { binding.etEditMobile.error = "Invalid phone"; return }
         if (address.isEmpty()) { binding.etEditAddress.error = "Address required"; return }
 
-        // UI State
+        // Password Validation (only if visible)
+        if (binding.passwordLayout.visibility == View.VISIBLE) {
+            if (newPassword.isEmpty() || newPassword.length < 6) {
+                binding.etNewPassword.error = "Password must be 6+ chars"
+                return
+            }
+        }
+
+        // Start Update UI
         binding.btnSaveProfile.isEnabled = false
         binding.btnSaveProfile.text = "Updating..."
 
-        lifecycleScope.launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             try {
-                // Prepare Updates Map
                 val updates = mutableMapOf<String, Any>(
                     "name" to name,
-                    "email" to email,
                     "phone" to phone,
-                    "address" to address // NEW
+                    "address" to address
                 )
 
-                // Handle Image Upload with Appwrite
+                // 1. Upload Image if changed
                 if (selectedImageUri != null) {
-                    val newImageUrl = appwriteManager.uploadAndGetUrl(requireContext(), bucketID, selectedImageUri!!)
-                    if (newImageUrl != null) {
-                        updates["imageUrl"] = newImageUrl
-                    } else {
-                        Log.e("UrbanFix", "Image upload returned null URL")
+                    val newUrl = appwriteManager.uploadAndGetUrl(requireContext(), bucketID, selectedImageUri!!)
+                    if (newUrl != null) updates["imageUrl"] = newUrl
+                }
+
+                // 2. Update Firebase Auth Password (if requested)
+                if (binding.passwordLayout.visibility == View.VISIBLE) {
+                    user.updatePassword(newPassword).addOnFailureListener {
+                        Log.e("UrbanFix", "Auth Update Failed: ${it.message}")
                     }
                 }
 
-                // Update Firebase Database
+                // 3. Update Realtime Database
                 database.child(uid).updateChildren(updates).addOnSuccessListener {
-                    if (isAdded) {
-                        Toast.makeText(requireContext(), "Profile Updated Successfully", Toast.LENGTH_SHORT).show()
+                    if (isAdded && _binding != null) {
+                        Toast.makeText(requireContext(), "Profile Updated!", Toast.LENGTH_SHORT).show()
                         findNavController().popBackStack()
                     }
                 }.addOnFailureListener { e ->
-                    resetButton(e.message)
+                    lifecycleScope.launch(Dispatchers.Main) { resetButton(e.message) }
                 }
 
             } catch (e: Exception) {
-                Log.e("UrbanFixError", "Save Error: ${e.message}")
-                resetButton(e.message)
+                withContext(Dispatchers.Main) { resetButton(e.message) }
             }
         }
     }

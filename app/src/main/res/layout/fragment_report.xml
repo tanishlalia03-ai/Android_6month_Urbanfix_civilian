@@ -1,268 +1,338 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="?android:attr/windowBackground">
+    android:background="#F8F9FA">
 
     <LinearLayout
+        android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Report an Issue"
-            android:textColor="?attr/colorOnSurface"
+            android:textColor="@color/black"
             android:textSize="28sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="20dp"
-            android:layout_marginStart="4dp"/>
+            android:textStyle="bold" />
 
-        <com.google.android.material.card.MaterialCardView
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0.6"
+            android:text="Help UrbanFix improve your community"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="3dp"
-            app:strokeWidth="3dp"
-            app:strokeColor="@color/black"
-            app:cardBackgroundColor="?attr/colorSurface">
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="24dp">
 
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="      Select Category"
-                    app:startIconTint="?attr/colorPrimary"
-                    app:startIconDrawable="@drawable/ic_category">
-
-                    <AutoCompleteTextView
-                        android:id="@+id/categorySpinner"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="none" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:hint="     Issue Title"
-                    app:startIconTint="?attr/colorPrimary"
-                    app:startIconDrawable="@drawable/ic_edit">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etTitle"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="textCapSentences" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:hint="Describe the problem">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etDescription"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="top"
-                        android:inputType="textMultiLine"
-                        android:lines="4" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Timeline"
-                    android:layout_marginTop="24dp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/colorPrimary" />
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="horizontal"
-                    android:weightSum="2">
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnPickDate"
-                        style="@style/Widget.Material3.Button.TonalButton"
-                        android:layout_width="0dp"
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="4dp"
-                        android:text="Date"
-                        app:icon="@drawable/ic_calendar" />
+                        android:hint="Category"
+                        app:startIconDrawable="@drawable/ic_category">
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnPickTime"
-                        style="@style/Widget.Material3.Button.TonalButton"
-                        android:layout_width="0dp"
+                        <AutoCompleteTextView
+                            android:id="@+id/categorySpinner"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="4dp"
-                        android:text="Time"
-                        app:icon="@drawable/ic_timer" />
+                        android:layout_marginTop="12dp"
+                        android:hint="Issue Title"
+                        app:startIconDrawable="@drawable/ic_edit">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textCapSentences" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="Describe the problem">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etDescription"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="top"
+                            android:inputType="textMultiLine"
+                            android:minLines="3" />
+                    </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <TextView
-                    android:id="@+id/tvSelectedDateTime"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Not selected"
-                    android:textSize="12sp"
-                    android:layout_marginTop="4dp"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Location"
-                    android:layout_marginTop="24dp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/colorPrimary" />
-
-                <com.google.android.material.button.MaterialButtonToggleGroup
-                    android:id="@+id/locationToggleGroup"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    app:singleSelection="true"
-                    app:selectionRequired="true">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnCurrentLoc"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="GPS"
-                        app:icon="@android:drawable/ic_menu_mylocation" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnManualLoc"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Manual"
-                        app:icon="@android:drawable/ic_menu_edit" />
-                </com.google.android.material.button.MaterialButtonToggleGroup>
-
-                <TextView
-                    android:id="@+id/tvSelectedLocation"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Location not set"
-                    android:textSize="12sp"
-                    android:layout_marginTop="4dp"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Attachments"
-                    android:layout_marginTop="24dp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/colorPrimary" />
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="horizontal"
-                    android:weightSum="2">
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnCamera"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="0dp"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="4dp"
-                        android:text="Camera"
-                        app:icon="@android:drawable/ic_menu_camera" />
+                        android:text="Timeline"
+                        android:textStyle="bold"
+                        android:textColor="?attr/colorPrimary" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnGallery"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="0dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="4dp"
-                        android:text="Gallery"
-                        app:icon="@android:drawable/ic_menu_gallery" />
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnPickDate"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="4dp"
+                            android:text="Date"
+                            app:icon="@drawable/ic_calendar" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnPickTime"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="4dp"
+                            android:text="Time"
+                            app:icon="@drawable/ic_timer" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvSelectedDateTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:alpha="0.6"
+                        android:text="Time not set"
+                        android:textSize="12sp" />
                 </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvImagePreview"
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="horizontal"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:listitem="@layout/item_image" />
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Priority Level"
-                    android:layout_marginTop="24dp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/colorOnSurface" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Location"
+                        android:textStyle="bold"
+                        android:textColor="?attr/colorPrimary" />
 
-                <RadioGroup
-                    android:id="@+id/urgencyRadioGroup"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnCurrentLoc"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="4dp"
+                            android:text="GPS"
+                            app:icon="@android:drawable/ic_menu_mylocation" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnManualLoc"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="4dp"
+                            android:text="Manual"
+                            app:icon="@android:drawable/ic_menu_edit" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvSelectedLocation"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:alpha="0.6"
+                        android:text="Location not set"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                    <com.google.android.material.radiobutton.MaterialRadioButton
-                        android:id="@+id/radioHigh"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Evidence Photos"
+                        android:textStyle="bold"
+                        android:textColor="?attr/colorPrimary" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvImagePreview"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="High (Emergency)" />
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        tools:listitem="@layout/item_image" />
 
-                    <com.google.android.material.radiobutton.MaterialRadioButton
-                        android:id="@+id/radioMedium"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Medium (Standard)" />
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
 
-                    <com.google.android.material.radiobutton.MaterialRadioButton
-                        android:id="@+id/radioLow"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Low (Flexible)" />
-                </RadioGroup>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnCamera"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="54dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="6dp"
+                            android:text="Camera"
+                            app:icon="@android:drawable/ic_menu_camera" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSubmit"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp"
-            android:text="Submit Report"
-            android:textSize="16sp"
-            app:cornerRadius="12dp" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnGallery"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="54dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="6dp"
+                            android:text="Gallery"
+                            app:icon="@android:drawable/ic_menu_gallery" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-    </LinearLayout>
-</ScrollView>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="How urgent is this?"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="8dp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/priorityToggle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:singleSelection="true"
+                app:selectionRequired="true">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnLow"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Low" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnMedium"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Standard" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnHigh"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Urgent" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSubmit"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="32dp"
+                android:text="Submit Report"
+                android:textStyle="bold"
+                app:cornerRadius="16dp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

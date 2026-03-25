@@ -23,9 +23,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Urbanfix">
         <activity
-            android:name=".recyclerviewImage.ImageDisplayAdapterActivity"
-            android:exported="false" />
-        <activity
             android:name=".SignupActivity2"
             android:exported="false" />
         <activity
@@ -33,7 +30,8 @@
             android:exported="false" />
         <activity
             android:name=".bottomnavigation.BottomLayoutActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan"/>
         <activity
             android:name=".constraintfiles.Constraint2Activity"
             android:exported="false" />

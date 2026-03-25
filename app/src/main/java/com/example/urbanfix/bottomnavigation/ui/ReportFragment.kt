@@ -38,7 +38,6 @@ import org.tensorflow.lite.task.text.nlclassifier.NLClassifier
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 class ReportFragment : Fragment() {
 
@@ -56,8 +55,6 @@ class ReportFragment : Fragment() {
     private var tempCameraUri: Uri? = null
 
     private val bucketID = "6996dc680036b04ee5f0"
-
-    // Advanced AI Variable
     private var textClassifier: NLClassifier? = null
 
     // --- LAUNCHERS ---
@@ -84,41 +81,37 @@ class ReportFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         setupRecyclerView()
         setupCategoryDropdown()
 
-        // Initialize Advanced AI in Background
+        // Background AI Init
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 textClassifier = NLClassifier.createFromFile(requireContext(), "text_classification.tflite")
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            } catch (e: Exception) { e.printStackTrace() }
         }
 
+        // --- BUTTON LISTENERS ---
         binding.btnGallery.setOnClickListener { pickImageLauncher.launch("image/*") }
         binding.btnCamera.setOnClickListener {
-            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                openCamera()
-            } else {
-                requestCameraPermission.launch(Manifest.permission.CAMERA)
-            }
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) openCamera()
+            else requestCameraPermission.launch(Manifest.permission.CAMERA)
         }
+
         binding.btnCurrentLoc.setOnClickListener { checkLocationPermissions() }
         binding.btnManualLoc.setOnClickListener { showManualLocationDialog() }
+
         setupDateTimePickers()
+
         binding.btnSubmit.setOnClickListener { handleSubmit() }
     }
 
     private fun openCamera() {
-        try {
-            val photoFile = File(requireContext().cacheDir, "IMG_${System.currentTimeMillis()}.jpg")
-            val authority = "${requireContext().applicationContext.packageName}.fileprovider"
-            tempCameraUri = FileProvider.getUriForFile(requireContext(), authority, photoFile)
-            takePhotoLauncher.launch(tempCameraUri)
-        } catch (e: Exception) {
-            Toast.makeText(context, "Camera Error: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
+        val photoFile = File(requireContext().cacheDir, "IMG_${System.currentTimeMillis()}.jpg")
+        val authority = "${requireContext().applicationContext.packageName}.fileprovider"
+        tempCameraUri = FileProvider.getUriForFile(requireContext(), authority, photoFile)
+        takePhotoLauncher.launch(tempCameraUri)
     }
 
     private fun setupRecyclerView() {
@@ -130,54 +123,69 @@ class ReportFragment : Fragment() {
     }
 
     private fun addImageToList(uri: Uri) {
-        selectedImagesList.add(uri)
-        imageAdapter.notifyItemInserted(selectedImagesList.size - 1)
-        binding.rvImagePreview.scrollToPosition(selectedImagesList.size - 1)
+        if (selectedImagesList.size < 3) {
+            selectedImagesList.add(uri)
+            imageAdapter.notifyItemInserted(selectedImagesList.size - 1)
+        } else {
+            Toast.makeText(context, "Max 3 images", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun setupDateTimePickers() {
+        binding.btnPickDate.setOnClickListener {
+            val dp = MaterialDatePicker.Builder.datePicker().build()
+            dp.show(parentFragmentManager, "DATE")
+            dp.addOnPositiveButtonClickListener {
+                selectedDate = SimpleDateFormat("dd/MMM/yyyy", Locale.getDefault()).format(Date(it))
+                updateDateTimeUI()
+            }
+        }
+        binding.btnPickTime.setOnClickListener {
+            val tp = MaterialTimePicker.Builder().setTimeFormat(TimeFormat.CLOCK_12H).build()
+            tp.show(parentFragmentManager, "TIME")
+            tp.addOnPositiveButtonClickListener {
+                selectedTime = String.format(Locale.getDefault(), "%02d:%02d", tp.hour, tp.minute)
+                updateDateTimeUI()
+            }
+        }
+    }
+
+    private fun updateDateTimeUI() {
+        binding.tvSelectedDateTime.text = "$selectedDate $selectedTime".trim()
+    }
+
+    private fun showManualLocationDialog() {
+        val input = EditText(requireContext())
+        AlertDialog.Builder(requireContext())
+            .setTitle("Manual Location")
+            .setView(input)
+            .setPositiveButton("Set") { _, _ -> binding.tvSelectedLocation.text = input.text.toString() }
+            .show()
     }
 
     private fun checkLocationPermissions() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fetchGPSLocation()
-        } else {
-            requestLocationPermission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
-        }
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) fetchGPSLocation()
+        else requestLocationPermission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
     }
 
     @androidx.annotation.RequiresPermission(anyOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private fun fetchGPSLocation() {
         val fusedClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        binding.tvSelectedLocation.text = "Locating..."
         fusedClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).addOnSuccessListener { loc ->
             loc?.let {
                 latitude = it.latitude
                 longitude = it.longitude
-                updateLocationUI("GPS Fix: ${getAddressFromCoords(it.latitude, it.longitude)}")
-            } ?: Toast.makeText(context, "Turn on GPS and try again", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun showManualLocationDialog() {
-        val editText = EditText(requireContext()).apply { hint = "Enter address or landmark" }
-        AlertDialog.Builder(requireContext())
-            .setTitle("Manual Location")
-            .setView(editText)
-            .setPositiveButton("Set") { _, _ ->
-                val manualAddress = editText.text.toString()
-                if (manualAddress.isNotEmpty()) updateLocationUI(manualAddress)
+                binding.tvSelectedLocation.text = getAddressFromCoords(it.latitude, it.longitude)
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        }
     }
 
     private fun getAddressFromCoords(lat: Double, lng: Double): String {
         return try {
-            val geocoder = Geocoder(requireContext(), Locale.getDefault())
-            val addresses = geocoder.getFromLocation(lat, lng, 1)
+            val addresses = Geocoder(requireContext(), Locale.getDefault()).getFromLocation(lat, lng, 1)
             addresses?.get(0)?.getAddressLine(0) ?: "$lat, $lng"
         } catch (e: Exception) { "$lat, $lng" }
-    }
-
-    private fun updateLocationUI(text: String) {
-        binding.tvSelectedLocation.text = text
     }
 
     private fun setupCategoryDropdown() {
@@ -185,117 +193,48 @@ class ReportFragment : Fragment() {
         binding.categorySpinner.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, categories))
     }
 
-    private fun setupDateTimePickers() {
-        binding.btnPickDate.setOnClickListener {
-            val dp = MaterialDatePicker.Builder.datePicker().build()
-            dp.show(parentFragmentManager, "DP")
-            dp.addOnPositiveButtonClickListener {
-                selectedDate = SimpleDateFormat("dd/MMM/yyyy", Locale.getDefault()).format(Date(it))
-                updateDateTimeDisplay()
-            }
-        }
-        binding.btnPickTime.setOnClickListener {
-            val tp = MaterialTimePicker.Builder().setTimeFormat(TimeFormat.CLOCK_12H).build()
-            tp.show(parentFragmentManager, "TP")
-            tp.addOnPositiveButtonClickListener {
-                selectedTime = String.format(Locale.getDefault(), "%02d:%02d", tp.hour, tp.minute)
-                updateDateTimeDisplay()
-            }
-        }
-    }
-
-    private fun updateDateTimeDisplay() {
-        binding.tvSelectedDateTime.text = if (selectedDate.isNotEmpty()) "$selectedDate | $selectedTime" else selectedTime
-    }
-
-    // --- HYBRID AI + MANUAL SUBMIT ---
     private fun handleSubmit() {
         val title = binding.etTitle.text.toString().trim()
-        val description = binding.etDescription.text.toString().trim()
+        val desc = binding.etDescription.text.toString().trim()
 
-        if (title.isEmpty()) { binding.etTitle.error = "Required"; return }
-        if (description.isEmpty()) { binding.etDescription.error = "Required"; return }
+        if (title.isEmpty() || desc.isEmpty()) { Toast.makeText(context, "Fill details", Toast.LENGTH_SHORT).show(); return }
 
-        var isAbusive = false
-
-        // 1. Layer 1: AI Sentiment Moderation (Strict 0.4 Threshold)
+        // AI + Manual Check
+        var toxic = false
         textClassifier?.let { ai ->
-            val results = ai.classify(description)
-            val category = results.find {
-                it.label.contains("Negative", ignoreCase = true) ||
-                        it.label.contains("Toxic", ignoreCase = true)
-            }
-            if ((category?.score ?: 0f) > 0.4f) {
-                isAbusive = true
-            }
+            val results = ai.classify(desc)
+            if ((results.find { it.label.contains("Negative") }?.score ?: 0f) > 0.4f) toxic = true
         }
-
-        // 2. Layer 2: Manual Pattern Matching
-        if (!isAbusive && containsProhibitedWords(description)) {
-            isAbusive = true
-        }
-
-        if (isAbusive) {
-            Toast.makeText(requireContext(),
-                "To keep our community helpful, please use professional language and then again submit.",
-                Toast.LENGTH_LONG).show()
-
-            binding.etDescription.error = "Please review your wording"
-            binding.etDescription.requestFocus()
+        if (toxic || listOf("abuse", "bad").any { desc.contains(it) }) {
+            Toast.makeText(context, "Please use clean language", Toast.LENGTH_SHORT).show()
             return
         }
 
         startSubmissionProcess()
     }
 
-    private fun containsProhibitedWords(text: String): Boolean {
-        val badWords = listOf(
-            "abuse", "idiot", "stupid", "fraud", "scam", "fucking", "bastard",
-            "shit", "bitch", "asshole", "piss", "dick", "pussy", "fake", "nonsense","useless", "dumb", "moron", "loser","liar", "corrupt", "bribe", "ghoos", "spam", "advertisement",
-            "f*ck", "sh*t", "a$$", "b*tch", "sc@m", "fr@ud"
-        )
-
-        val cleanInput = text.lowercase(Locale.getDefault())
-            .replace(" ", "")
-            .replace(".", "")
-            .replace("*", "")
-            .replace("-", "")
-            .replace("_", "")
-            .replace("@", "a")
-            .replace("0", "o")
-            .replace("1", "i")
-
-        return badWords.any { cleanInput.contains(it) }
-    }
-
     private fun startSubmissionProcess() {
-        val title = binding.etTitle.text.toString().trim()
-        val description = binding.etDescription.text.toString().trim()
-        val issueType = binding.categorySpinner.text.toString()
-        val civilianId = FirebaseAuth.getInstance().currentUser?.uid
-        val priority = if (binding.urgencyRadioGroup.checkedRadioButtonId == R.id.radioHigh) 2 else 1
-
-        if (selectedImagesList.isEmpty() || civilianId == null) {
-            Toast.makeText(requireContext(), "Check images or login status", Toast.LENGTH_SHORT).show()
-            return
-        }
+        val civilianId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        if (selectedImagesList.isEmpty()) { Toast.makeText(context, "Add images", Toast.LENGTH_SHORT).show(); return }
 
         binding.btnSubmit.isEnabled = false
-        Toast.makeText(requireContext(), "Verification Successful. Uploading...", Toast.LENGTH_SHORT).show()
-
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val uploadedUrls = ArrayList<String>()
-                selectedImagesList.forEach { uri ->
-                    val url = appwriteManager.uploadAndGetUrl(requireContext(), bucketID, uri)
-                    url?.let { uploadedUrls.add(it) }
+                val urls = selectedImagesList.mapNotNull { appwriteManager.uploadAndGetUrl(requireContext(), bucketID, it) }
+                val key = FirebaseDatabase.getInstance().getReference("Complaints").push().key ?: ""
+
+                val priority = when(binding.priorityToggle.checkedButtonId) {
+                    R.id.btnHigh -> 2
+                    R.id.btnMedium -> 1
+                    else -> 0
                 }
 
                 val complaint = ComplaintModel(
-                    title = title,
-                    description = description,
-                    issueType = issueType,
-                    images = uploadedUrls,
+                    complaintId = key,
+                    title = binding.etTitle.text.toString(),
+                    description = binding.etDescription.text.toString(),
+                    issueType = binding.categorySpinner.text.toString(),
+                    images = ArrayList(urls),
                     civilianId = civilianId,
                     latitude = latitude,
                     longitude = longitude,
@@ -305,43 +244,17 @@ class ReportFragment : Fragment() {
                     location = binding.tvSelectedLocation.text.toString()
                 )
 
-                val dbRef = FirebaseDatabase.getInstance().getReference("Complaints")
-                val adminMsgRef = FirebaseDatabase.getInstance().getReference("AdminMessages")
-                val complaintKey = dbRef.push().key ?: UUID.randomUUID().toString()
-
                 withContext(Dispatchers.Main) {
-                    dbRef.child(complaintKey).setValue(complaint.copy(complaintId = complaintKey))
-                        .addOnSuccessListener {
-
-                            // --- ADMIN NOTIFICATION TRIGGER WITH LINKED ID ---
-                            val notificationData = mapOf(
-                                "title" to "New Report: $title",
-                                "body" to "A new $issueType report has been filed.",
-                                "complaintId" to complaintKey, // Links both root nodes
-                                "timestamp" to ServerValue.TIMESTAMP,
-                                "status" to "unread"
-                            )
-                            adminMsgRef.push().setValue(notificationData)
-
-                            Toast.makeText(requireContext(), "Report Submitted! Admin Notified.", Toast.LENGTH_LONG).show()
-                            requireActivity().onBackPressedDispatcher.onBackPressed()
-                        }
-                        .addOnFailureListener {
-                            binding.btnSubmit.isEnabled = true
-                            Toast.makeText(requireContext(), "Database Error", Toast.LENGTH_SHORT).show()
-                        }
+                    FirebaseDatabase.getInstance().getReference("Complaints").child(key).setValue(complaint).addOnSuccessListener {
+                        Toast.makeText(requireContext(), "Submitted!", Toast.LENGTH_SHORT).show()
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                    }
                 }
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    binding.btnSubmit.isEnabled = true
-                    Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
+                withContext(Dispatchers.Main) { binding.btnSubmit.isEnabled = true }
             }
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
+    override fun onDestroyView() { super.onDestroyView(); _binding = null }
 }

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="?android:attr/windowBackground">
+    android:background="?attr/colorSurface">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,7 +16,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="28dp">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -32,16 +33,16 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Hello, "
-                        android:textSize="20sp"
+                        android:textSize="22sp"
                         android:textColor="?attr/colorOnSurface"
-                        android:textStyle="bold" />
+                        android:fontFamily="sans-serif-medium" />
 
                     <TextView
                         android:id="@+id/tv_user_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="User"
-                        android:textSize="20sp"
+                        android:text="Tanish"
+                        android:textSize="22sp"
                         android:textColor="?attr/colorPrimary"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -50,23 +51,24 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Report issues around you"
-                    android:textColor="?attr/colorOnSurface"
-                    android:alpha="0.6"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="14sp" />
             </LinearLayout>
 
             <com.google.android.material.card.MaterialCardView
-                android:layout_width="45dp"
-                android:layout_height="45dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                app:cardCornerRadius="22.5dp"
-                app:cardElevation="2dp">
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="?attr/colorOutlineVariant">
                 <ImageView
+                    android:id="@+id/iv_profile_image"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:padding="10dp"
-                    android:scaleType="centerInside"
+                    android:scaleType="centerCrop"
                     android:src="@drawable/ic_flag" />
             </com.google.android.material.card.MaterialCardView>
         </RelativeLayout>
@@ -78,42 +80,43 @@
             android:textStyle="bold"
             android:textColor="?attr/colorOnSurface"
             android:textSize="16sp"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginBottom="16dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:baselineAligned="false"
             android:weightSum="3">
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginEnd="4dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="3dp">
+                android:layout_marginEnd="6dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#FFF5F5">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:padding="12dp"
+                    android:padding="16dp"
                     android:orientation="vertical">
                     <TextView
                         android:id="@+id/tv_count_pending"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="00"
-                        android:textColor="#FF5252"
-                        android:textSize="18sp"
+                        android:textColor="#D32F2F"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Pending"
-                        android:alpha="0.8"
-                        android:textSize="12sp"/>
+                        android:textColor="#D32F2F"
+                        android:textSize="11sp"
+                        android:textStyle="bold"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -121,29 +124,31 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginHorizontal="4dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="3dp">
+                android:layout_marginHorizontal="3dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#F1F8E9">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:padding="12dp"
+                    android:padding="16dp"
                     android:orientation="vertical">
                     <TextView
                         android:id="@+id/tv_count_progress"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="00"
-                        android:textColor="#4CAF50"
-                        android:textSize="18sp"
+                        android:textColor="#388E3C"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Progress"
-                        android:alpha="0.8"
-                        android:textSize="12sp" />
+                        android:text="Active"
+                        android:textColor="#388E3C"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -151,29 +156,31 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="4dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="3dp">
+                android:layout_marginStart="6dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#E0F7FA">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:padding="12dp"
+                    android:padding="16dp"
                     android:orientation="vertical">
                     <TextView
                         android:id="@+id/tv_count_completed"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="00"
-                        android:textColor="#00BCD4"
-                        android:textSize="18sp"
+                        android:textColor="#0097A7"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Done"
-                        android:alpha="0.8"
-                        android:textSize="12sp" />
+                        android:text="Completed"
+                        android:textColor="#0097A7"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
@@ -181,24 +188,26 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp">
+            android:layout_marginTop="24dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="?attr/colorOutlineVariant">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="10dp">
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Visual Analytics"
-                    android:textSize="14sp"
-                    android:paddingStart="10dp"
-                    android:textStyle="italic"
-                    android:alpha="0.6"/>
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginBottom="8dp"/>
 
                 <com.github.mikephil.charting.charts.PieChart
                     android:id="@+id/complaintsPieChart"
@@ -209,18 +218,29 @@
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
-            android:layout_height="160dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="4dp"
-            app:strokeWidth="3dp"
-            app:strokeColor="@color/black">
+            android:layout_height="180dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="4dp">
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_urbanhome" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#40000000"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start"
+                android:layout_margin="20dp"
+                android:text="Building a better city together"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:textSize="18sp"/>
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>

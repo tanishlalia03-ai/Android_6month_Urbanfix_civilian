@@ -1,6 +1,5 @@
 package com.example.urbanfix.bottomnavigation.ui
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -34,14 +33,15 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             findNavController().navigate(R.id.action_navigation_profile_to_editProfileFragment)
         }
 
-        // 2. Logout Logic
-        binding.btnLogout.setOnClickListener {
+        // 2. Logout Logic (Updated ID to match the new mini button in header)
+        binding.btnLogoutMini.setOnClickListener {
             showLogoutBottomSheet()
         }
     }
 
     private fun showLogoutBottomSheet() {
         val dialog = BottomSheetDialog(requireContext())
+        // Ensure this layout exists in your res/layout folder
         val view = layoutInflater.inflate(R.layout.layout_logout_bottom_sheet, null, false)
 
         val btnConfirm = view.findViewById<Button>(R.id.btn_confirm_logout)
@@ -52,7 +52,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             auth.signOut()
             Toast.makeText(requireContext(), "Logged Out Successfully", Toast.LENGTH_SHORT).show()
 
-            // Close the current activity and return to Login
+            // Navigate back to Login Activity
             requireActivity().finish()
         }
 
@@ -69,13 +69,13 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         // Show loading state
         binding.profileProgressBar.visibility = View.VISIBLE
+        // Note: Using alpha or invisible keeps the layout structure while loading
         binding.profileScrollView.visibility = View.INVISIBLE
 
         database.child(uid).get().addOnSuccessListener { snapshot ->
-            // Safety check: verify fragment is still attached to UI before updating views
+            // Safety check for Fragment lifecycle
             if (_binding == null || !isAdded) return@addOnSuccessListener
 
-            // map snapshot to your UserModel
             val name = snapshot.child("name").getValue(String::class.java)
             val email = snapshot.child("email").getValue(String::class.java)
             val phone = snapshot.child("phone").getValue(String::class.java)
@@ -89,22 +89,21 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 tvProfileEmail.text = email ?: "No Email Provided"
                 tvProfilePhone.text = phone ?: "No Phone Provided"
 
-                // New Fields from the updated XML
+                // Using the individual card TextViews from the new XML
                 tvProfileRole.text = role?.uppercase() ?: "USER"
                 tvProfileAddress.text = address ?: "No Address Added"
 
-                // Load Profile Image
+                // Load Profile Image with Glide
                 if (!imagePath.isNullOrEmpty()) {
                     Glide.with(this@ProfileFragment)
                         .load(imagePath)
                         .placeholder(R.drawable.ic_person)
                         .error(R.drawable.ic_person)
-                        .circleCrop()
+                        .circleCrop() // Modern circular look
                         .into(ivProfileDisplay)
                 }
             }
 
-            // Hide loading and show content
             binding.profileProgressBar.visibility = View.GONE
             binding.profileScrollView.visibility = View.VISIBLE
 
@@ -119,6 +118,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null // Clear binding to prevent memory leaks
+        _binding = null
     }
 }
