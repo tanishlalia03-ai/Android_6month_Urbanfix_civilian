@@ -1,6 +1,7 @@
 package com.example.urbanfix.bottomnavigation.ui
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.net.Uri
@@ -30,7 +31,6 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ServerValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -71,7 +71,10 @@ class ReportFragment : Fragment() {
     }
 
     private val requestLocationPermission = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true) fetchGPSLocation()
+        if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+            permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true) {
+            fetchGPSLocation()
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -92,7 +95,6 @@ class ReportFragment : Fragment() {
             } catch (e: Exception) { e.printStackTrace() }
         }
 
-        // --- BUTTON LISTENERS ---
         binding.btnGallery.setOnClickListener { pickImageLauncher.launch("image/*") }
         binding.btnCamera.setOnClickListener {
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) openCamera()
@@ -103,7 +105,6 @@ class ReportFragment : Fragment() {
         binding.btnManualLoc.setOnClickListener { showManualLocationDialog() }
 
         setupDateTimePickers()
-
         binding.btnSubmit.setOnClickListener { handleSubmit() }
     }
 
@@ -159,33 +160,49 @@ class ReportFragment : Fragment() {
         AlertDialog.Builder(requireContext())
             .setTitle("Manual Location")
             .setView(input)
-            .setPositiveButton("Set") { _, _ -> binding.tvSelectedLocation.text = input.text.toString() }
+            .setPositiveButton("Set") { _, _ ->
+                binding.tvSelectedLocation.text = input.text.toString()
+            }
             .show()
     }
 
     private fun checkLocationPermissions() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) fetchGPSLocation()
-        else requestLocationPermission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
-    }
-
-    @androidx.annotation.RequiresPermission(anyOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-    private fun fetchGPSLocation() {
-        val fusedClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-        binding.tvSelectedLocation.text = "Locating..."
-        fusedClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).addOnSuccessListener { loc ->
-            loc?.let {
-                latitude = it.latitude
-                longitude = it.longitude
-                binding.tvSelectedLocation.text = getAddressFromCoords(it.latitude, it.longitude)
-            }
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fetchGPSLocation()
+        } else {
+            requestLocationPermission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
         }
     }
 
-    private fun getAddressFromCoords(lat: Double, lng: Double): String {
-        return try {
-            val addresses = Geocoder(requireContext(), Locale.getDefault()).getFromLocation(lat, lng, 1)
-            addresses?.get(0)?.getAddressLine(0) ?: "$lat, $lng"
-        } catch (e: Exception) { "$lat, $lng" }
+    @SuppressLint("MissingPermission")
+    private fun fetchGPSLocation() {
+        val fusedClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        binding.tvSelectedLocation.text = "Locating..."
+
+        fusedClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+            .addOnSuccessListener { loc ->
+                loc?.let {
+                    this.latitude = it.latitude
+                    this.longitude = it.longitude
+
+                    lifecycleScope.launch {
+                        val address = getAddressFromCoords(it.latitude, it.longitude)
+                        binding.tvSelectedLocation.text = address
+                    }
+                }
+            }
+    }
+
+    private suspend fun getAddressFromCoords(lat: Double, lng: Double): String {
+        return withContext(Dispatchers.IO) {
+            try {
+                val geocoder = Geocoder(requireContext(), Locale.getDefault())
+                val addresses = geocoder.getFromLocation(lat, lng, 1)
+                addresses?.firstOrNull()?.getAddressLine(0) ?: "Address not found"
+            } catch (e: Exception) {
+                "Lat: $lat, Lng: $lng"
+            }
+        }
     }
 
     private fun setupCategoryDropdown() {
@@ -197,17 +214,36 @@ class ReportFragment : Fragment() {
         val title = binding.etTitle.text.toString().trim()
         val desc = binding.etDescription.text.toString().trim()
 
-        if (title.isEmpty() || desc.isEmpty()) { Toast.makeText(context, "Fill details", Toast.LENGTH_SHORT).show(); return }
-
-        // AI + Manual Check
-        var toxic = false
-        textClassifier?.let { ai ->
-            val results = ai.classify(desc)
-            if ((results.find { it.label.contains("Negative") }?.score ?: 0f) > 0.4f) toxic = true
-        }
-        if (toxic || listOf("abuse", "bad").any { desc.contains(it) }) {
-            Toast.makeText(context, "Please use clean language", Toast.LENGTH_SHORT).show()
+        if (title.isEmpty()) {
+            binding.etTitle.error = "Title required"
             return
+        }
+        if (desc.isEmpty()) {
+            binding.etDescription.error = "Description required"
+            return
+        }
+
+        // --- MANUAL WRONG WORD CHECK ---
+        val wrongWords = arrayOf("stupid", "idiot", "dumb", "fool", "nonsense", "rubbish", "crap",
+            "hell", "damn", "suck", "trash","worthless")
+        for (word in wrongWords) {
+            if (desc.lowercase().contains(word)) {
+                binding.etDescription.error = "Inappropriate wording: '$word' detected"
+                binding.etDescription.requestFocus()
+                return
+            }
+        }
+
+        // --- AI WORDING CHECK ---
+        textClassifier?.let { classifier ->
+            val results = classifier.classify(desc)
+            val topResult = results.maxByOrNull { it.score }
+
+            if (topResult?.label == "Negative" && topResult.score > 0.45) {
+                binding.etDescription.error = "Please use professional wording (AI review active)"
+                binding.etDescription.requestFocus()
+                return
+            }
         }
 
         startSubmissionProcess()
@@ -215,13 +251,19 @@ class ReportFragment : Fragment() {
 
     private fun startSubmissionProcess() {
         val civilianId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        if (selectedImagesList.isEmpty()) { Toast.makeText(context, "Add images", Toast.LENGTH_SHORT).show(); return }
+        if (selectedImagesList.isEmpty()) {
+            Toast.makeText(context, "Add images", Toast.LENGTH_SHORT).show()
+            return
+        }
 
         binding.btnSubmit.isEnabled = false
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val urls = selectedImagesList.mapNotNull { appwriteManager.uploadAndGetUrl(requireContext(), bucketID, it) }
-                val key = FirebaseDatabase.getInstance().getReference("Complaints").push().key ?: ""
+
+                val complaintRef = FirebaseDatabase.getInstance().getReference("Complaints")
+                val adminMsgRef = FirebaseDatabase.getInstance().getReference("AdminMessages")
+                val key = complaintRef.push().key ?: ""
 
                 val priority = when(binding.priorityToggle.checkedButtonId) {
                     R.id.btnHigh -> 2
@@ -245,16 +287,32 @@ class ReportFragment : Fragment() {
                 )
 
                 withContext(Dispatchers.Main) {
-                    FirebaseDatabase.getInstance().getReference("Complaints").child(key).setValue(complaint).addOnSuccessListener {
+                    complaintRef.child(key).setValue(complaint).addOnSuccessListener {
+
+                        // --- SEND DATA TO ADMIN NODE FOR FCM ---
+                        val adminNotification = mapOf(
+                            "title" to "New Report: ${complaint.title}",
+                            "body" to "Category: ${complaint.issueType}",
+                            "complaintId" to key
+                        )
+                        adminMsgRef.push().setValue(adminNotification)
+                        // ----------------------------------------
+
                         Toast.makeText(requireContext(), "Submitted!", Toast.LENGTH_SHORT).show()
                         requireActivity().onBackPressedDispatcher.onBackPressed()
                     }
                 }
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) { binding.btnSubmit.isEnabled = true }
+                withContext(Dispatchers.Main) {
+                    binding.btnSubmit.isEnabled = true
+                    Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
 
-    override fun onDestroyView() { super.onDestroyView(); _binding = null }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }
