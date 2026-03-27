@@ -20,7 +20,8 @@
             android:text="Report an Issue"
             android:textColor="@color/black"
             android:textSize="28sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            />
 
         <TextView
             android:layout_width="wrap_content"
