@@ -30,58 +30,69 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true"
-                android:text="All"
-                android:textColor="@android:color/white"
-                app:chipBackgroundColor="?attr/colorPrimary" />
+                android:text="All" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_favorite"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
                 android:text="Favorite"
-                app:chipIcon="@android:drawable/btn_star_big_on"
-                app:chipIconTint="@android:color/white"
-                app:chipSurfaceColor="?attr/colorPrimary" />
+                app:chipIcon="@android:drawable/btn_star_big_on" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_pending"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
-                android:text="Pending"
-                app:chipSurfaceColor="?attr/colorPrimary" />
+                android:text="Pending" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_completed"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
-                android:text="Completed"
-                app:chipSurfaceColor="?attr/colorPrimary" />
+                android:text="Completed" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_active"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
-                android:text="Active"
-                app:chipSurfaceColor="?attr/colorPrimary" />
+                android:text="Active" />
 
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvComplaints"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="4dp"
-        android:layout_weight="1"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/item_complaints" />
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvComplaints"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="4dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_complaints" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvNoData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="No complaints found"
+            android:textSize="16sp"
+            android:visibility="gone" />
+
+    </FrameLayout>
 
 </LinearLayout>

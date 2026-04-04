@@ -57,7 +57,6 @@ class ReportFragment : Fragment() {
     private val bucketID = "6996dc680036b04ee5f0"
     private var textClassifier: NLClassifier? = null
 
-    // --- LAUNCHERS ---
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { addImageToList(it) }
     }
@@ -88,7 +87,6 @@ class ReportFragment : Fragment() {
         setupRecyclerView()
         setupCategoryDropdown()
 
-        // Background AI Init
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 textClassifier = NLClassifier.createFromFile(requireContext(), "text_classification.tflite")
@@ -157,12 +155,36 @@ class ReportFragment : Fragment() {
 
     private fun showManualLocationDialog() {
         val input = EditText(requireContext())
+        input.hint = "e.g. Model Town, Ludhiana"
         AlertDialog.Builder(requireContext())
             .setTitle("Manual Location")
+            .setMessage("Enter an address to find coordinates")
             .setView(input)
             .setPositiveButton("Set") { _, _ ->
-                binding.tvSelectedLocation.text = input.text.toString()
+                val addressStr = input.text.toString().trim()
+                if (addressStr.isNotEmpty()) {
+                    binding.tvSelectedLocation.text = "Fetching coordinates..."
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        try {
+                            val geocoder = Geocoder(requireContext(), Locale.getDefault())
+                            val addresses = geocoder.getFromLocationName(addressStr, 1)
+                            withContext(Dispatchers.Main) {
+                                if (!addresses.isNullOrEmpty()) {
+                                    latitude = addresses[0].latitude
+                                    longitude = addresses[0].longitude
+                                    binding.tvSelectedLocation.text = addressStr
+                                    Toast.makeText(requireContext(), "Location Linked", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    binding.tvSelectedLocation.text = "Error: Address Not Found"
+                                }
+                            }
+                        } catch (e: Exception) {
+                            withContext(Dispatchers.Main) { binding.tvSelectedLocation.text = "Network Error" }
+                        }
+                    }
+                }
             }
+            .setNegativeButton("Cancel", null)
             .show()
     }
 
@@ -184,7 +206,6 @@ class ReportFragment : Fragment() {
                 loc?.let {
                     this.latitude = it.latitude
                     this.longitude = it.longitude
-
                     lifecycleScope.launch {
                         val address = getAddressFromCoords(it.latitude, it.longitude)
                         binding.tvSelectedLocation.text = address
@@ -199,14 +220,18 @@ class ReportFragment : Fragment() {
                 val geocoder = Geocoder(requireContext(), Locale.getDefault())
                 val addresses = geocoder.getFromLocation(lat, lng, 1)
                 addresses?.firstOrNull()?.getAddressLine(0) ?: "Address not found"
-            } catch (e: Exception) {
-                "Lat: $lat, Lng: $lng"
-            }
+            } catch (e: Exception) { "Lat: $lat, Lng: $lng" }
         }
     }
 
     private fun setupCategoryDropdown() {
-        val categories = arrayOf("Pothole & Road Damage", "Garbage & Waste", "Street Light Outage", "Water Leak & Pipe Burst", "Sewage & Clogged Drains", "Other")
+        val categories = arrayOf(
+            "Pothole & Road Damage", "Garbage & Waste", "Street Light Outage",
+            "Water Leak & Pipe Burst", "Sewage & Clogged Drains", "Illegal Encroachment",
+            "Park & Playground Maintenance", "Stray Animal Menace", "Electricity Fault",
+            "Illegal Construction", "Public Toilet Hygiene", "Dangling Wires",
+            "Noise Pollution", "Dead Animal Removal", "Other"
+        )
         binding.categorySpinner.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, categories))
     }
 
@@ -214,35 +239,21 @@ class ReportFragment : Fragment() {
         val title = binding.etTitle.text.toString().trim()
         val desc = binding.etDescription.text.toString().trim()
 
-        if (title.isEmpty()) {
-            binding.etTitle.error = "Title required"
-            return
-        }
-        if (desc.isEmpty()) {
-            binding.etDescription.error = "Description required"
-            return
-        }
+        if (title.isEmpty()) { binding.etTitle.error = "Title required"; return }
+        if (desc.isEmpty()) { binding.etDescription.error = "Description required"; return }
 
-        // --- MANUAL WRONG WORD CHECK ---
-        val wrongWords = arrayOf("stupid", "idiot", "dumb", "fool", "nonsense", "rubbish", "crap",
-            "hell", "damn", "suck", "trash","worthless")
+        val wrongWords = arrayOf("stupid", "idiot", "dumb", "fool", "nonsense", "rubbish", "crap", "hell", "damn", "trash", "fuck", "shit", "bastard", "bitch")
         for (word in wrongWords) {
             if (desc.lowercase().contains(word)) {
-                binding.etDescription.error = "Inappropriate wording: '$word' detected"
-                binding.etDescription.requestFocus()
-                return
+                binding.etDescription.error = "Inappropriate wording detected"; return
             }
         }
 
-        // --- AI WORDING CHECK ---
         textClassifier?.let { classifier ->
             val results = classifier.classify(desc)
             val topResult = results.maxByOrNull { it.score }
-
             if (topResult?.label == "Negative" && topResult.score > 0.45) {
-                binding.etDescription.error = "Please use professional wording (AI review active)"
-                binding.etDescription.requestFocus()
-                return
+                binding.etDescription.error = "Please use professional wording"; return
             }
         }
 
@@ -260,10 +271,7 @@ class ReportFragment : Fragment() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val urls = selectedImagesList.mapNotNull { appwriteManager.uploadAndGetUrl(requireContext(), bucketID, it) }
-
-                val complaintRef = FirebaseDatabase.getInstance().getReference("Complaints")
-                val adminMsgRef = FirebaseDatabase.getInstance().getReference("AdminMessages")
-                val key = complaintRef.push().key ?: ""
+                val key = FirebaseDatabase.getInstance().getReference("Complaints").push().key ?: ""
 
                 val priority = when(binding.priorityToggle.checkedButtonId) {
                     R.id.btnHigh -> 2
@@ -287,17 +295,7 @@ class ReportFragment : Fragment() {
                 )
 
                 withContext(Dispatchers.Main) {
-                    complaintRef.child(key).setValue(complaint).addOnSuccessListener {
-
-                        // --- SEND DATA TO ADMIN NODE FOR FCM ---
-                        val adminNotification = mapOf(
-                            "title" to "New Report: ${complaint.title}",
-                            "body" to "Category: ${complaint.issueType}",
-                            "complaintId" to key
-                        )
-                        adminMsgRef.push().setValue(adminNotification)
-                        // ----------------------------------------
-
+                    FirebaseDatabase.getInstance().getReference("Complaints").child(key).setValue(complaint).addOnSuccessListener {
                         Toast.makeText(requireContext(), "Submitted!", Toast.LENGTH_SHORT).show()
                         requireActivity().onBackPressedDispatcher.onBackPressed()
                     }
@@ -311,8 +309,5 @@ class ReportFragment : Fragment() {
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
+    override fun onDestroyView() { super.onDestroyView(); _binding = null }
 }

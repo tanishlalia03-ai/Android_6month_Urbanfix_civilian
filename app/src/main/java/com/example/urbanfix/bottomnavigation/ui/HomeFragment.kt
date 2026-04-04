@@ -1,182 +1,219 @@
 package com.example.urbanfix.bottomnavigation.ui
 
-import android.content.res.Configuration
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
+import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import com.example.urbanfix.R
 import com.github.mikephil.charting.charts.PieChart
-import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
-class HomeFragment : Fragment(R.layout.fragment_home) {
+class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
     private var tvUserName: TextView? = null
     private var tvPending: TextView? = null
     private var tvProgress: TextView? = null
     private var tvCompleted: TextView? = null
     private var pieChart: PieChart? = null
+    private var mGoogleMap: GoogleMap? = null
+    private var homeScrollView: NestedScrollView? = null
 
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseDatabase.getInstance()
+    private var complaintsListener: ValueEventListener? = null
+    private var complaintsRef: DatabaseReference? = null
 
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) getCurrentLocationAndMoveCamera()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Initialize Views
         tvUserName = view.findViewById(R.id.tv_user_name)
         tvPending = view.findViewById(R.id.tv_count_pending)
         tvProgress = view.findViewById(R.id.tv_count_progress)
         tvCompleted = view.findViewById(R.id.tv_count_completed)
         pieChart = view.findViewById(R.id.complaintsPieChart)
 
-        // 2. Load User Data
-        val currentUserId = auth.currentUser?.uid
-        if (currentUserId != null) {
-            fetchUserName(currentUserId)
-            listenForComplaintSummary(currentUserId)
-        }
-    }
+        // Find the ScrollView and Map Container for touch logic
+        homeScrollView = view.findViewById(R.id.home_scroll_view)
+        val mapContainer = view.findViewById<View>(R.id.map_container)
 
-    private fun fetchUserName(uid: String) {
-        db.getReference("Users").child(uid).child("name").get().addOnSuccessListener { snapshot ->
-            if (isAdded) {
-                val nameFromDb = snapshot.getValue(String::class.java)
-                tvUserName?.text = nameFromDb ?: "User"
+        // --- TOUCH INTERCEPT LOGIC ---
+        // Stops the page from scrolling when you move the map
+        mapContainer.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    homeScrollView?.requestDisallowInterceptTouchEvent(true)
+                    false
+                }
+                MotionEvent.ACTION_UP -> {
+                    homeScrollView?.requestDisallowInterceptTouchEvent(false)
+                    true
+                }
+                else -> false
             }
         }
+
+        val mapFragment = SupportMapFragment.newInstance()
+        childFragmentManager.beginTransaction()
+            .replace(R.id.map_container, mapFragment)
+            .commit()
+        mapFragment.getMapAsync(this)
+
+        val uid = auth.currentUser?.uid ?: return
+        fetchUserName(uid)
     }
 
-    private fun listenForComplaintSummary(uid: String) {
-        // Efficient Query: Only fetch complaints for the current user
-        val userComplaintsQuery = db.getReference("Complaints")
-            .orderByChild("civilianId")
-            .equalTo(uid)
+    override fun onMapReady(googleMap: GoogleMap) {
+        mGoogleMap = googleMap
 
-        userComplaintsQuery.addValueEventListener(object : ValueEventListener {
+        googleMap.uiSettings.apply {
+            isScrollGesturesEnabled = true
+            isZoomGesturesEnabled = true
+            isTiltGesturesEnabled = true
+            isRotateGesturesEnabled = true
+            isZoomControlsEnabled = true
+            isMapToolbarEnabled = true
+        }
+
+        checkPermissionAndLoadMap()
+
+        val uid = auth.currentUser?.uid ?: return
+        listenToComplaints(uid)
+    }
+
+    private fun checkPermissionAndLoadMap() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED) {
+            getCurrentLocationAndMoveCamera()
+        } else {
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun getCurrentLocationAndMoveCamera() {
+        try {
+            mGoogleMap?.isMyLocationEnabled = true
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    val currentLatLng = LatLng(location.latitude, location.longitude)
+                    mGoogleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 14f))
+                } else {
+                    mGoogleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(31.3260, 75.5762), 11f))
+                }
+            }
+        } catch (e: SecurityException) { e.printStackTrace() }
+    }
+
+    private fun listenToComplaints(uid: String) {
+        complaintsRef = db.getReference("Complaints")
+        complaintsListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                if (!isAdded) return
+                if (!isAdded || mGoogleMap == null) return
 
-                var pCount = 0
-                var prCount = 0
-                var cCount = 0
+                var p = 0; var pr = 0; var c = 0
+                mGoogleMap?.clear()
 
                 for (ds in snapshot.children) {
-                    val status = ds.child("status").getValue(Int::class.java) ?: -1
-                    when (status) {
-                        0 -> pCount++
-                        1 -> prCount++
-                        2 -> cCount++
+                    val status = ds.child("status").getValue(Int::class.java) ?: 0
+                    val cId = ds.child("civilianId").getValue(String::class.java)
+                    val lat = ds.child("latitude").getValue(Double::class.java)
+                    val lng = ds.child("longitude").getValue(Double::class.java)
+
+                    if (cId == uid) {
+                        when (status) {
+                            0 -> p++; 1 -> pr++; 2 -> c++
+                        }
+                    }
+
+                    if (lat != null && lng != null) {
+                        val hue = when(status) {
+                            0 -> BitmapDescriptorFactory.HUE_AZURE   // Pending
+                            1 -> BitmapDescriptorFactory.HUE_ORANGE  // Progress
+                            else -> BitmapDescriptorFactory.HUE_CYAN // Solved
+                        }
+
+                        mGoogleMap?.addMarker(MarkerOptions()
+                            .position(LatLng(lat, lng))
+                            .title("Status: ${if(status==0) "Pending" else if(status==1) "Active" else "Solved"}")
+                            .icon(BitmapDescriptorFactory.defaultMarker(hue)))
                     }
                 }
 
-                // Format with leading zeros (e.g., 05 instead of 5)
-                tvPending?.text = String.format("%02d", pCount)
-                tvProgress?.text = String.format("%02d", prCount)
-                tvCompleted?.text = String.format("%02d", cCount)
+                tvPending?.text = String.format("%02d", p)
+                tvProgress?.text = String.format("%02d", pr)
+                tvCompleted?.text = String.format("%02d", c)
 
-                updatePieChart(pCount, prCount, cCount)
+                updatePieChart(p, pr, c)
             }
-
             override fun onCancelled(error: DatabaseError) {}
-        })
+        }
+        complaintsRef?.addValueEventListener(complaintsListener!!)
     }
 
+    private fun fetchUserName(uid: String) {
+        db.getReference("Users").child(uid).child("name").get().addOnSuccessListener {
+            if (isAdded) tvUserName?.text = it.getValue(String::class.java) ?: "User"
+        }
+    }
     private fun updatePieChart(p: Int, pr: Int, c: Int) {
-        val chart = pieChart ?: return
         val entries = ArrayList<PieEntry>()
-        val colors = ArrayList<Int>()
-
-        // Use the professional tonal colors
-        if (p > 0) {
-            entries.add(PieEntry(p.toFloat(), "Pending"))
-            colors.add(Color.parseColor("#D32F2F"))
-        }
-        if (pr > 0) {
-            entries.add(PieEntry(pr.toFloat(), "Active"))
-            colors.add(Color.parseColor("#388E3C"))
-        }
-        if (c > 0) {
-            entries.add(PieEntry(c.toFloat(), "Resolved"))
-            colors.add(Color.parseColor("#0097A7"))
-        }
-
-        if (entries.isEmpty()) {
-            chart.clear()
-            chart.setNoDataText("Start reporting to see data!")
-            chart.invalidate()
-            return
-        }
+        if (p > 0) entries.add(PieEntry(p.toFloat(), "Pending"))
+        if (pr > 0) entries.add(PieEntry(pr.toFloat(), "Active"))
+        if (c > 0) entries.add(PieEntry(c.toFloat(), "Solved"))
 
         val dataSet = PieDataSet(entries, "").apply {
-            this.colors = colors
-            valueTextSize = 13f
-            valueTextColor = if (isDarkMode()) Color.WHITE else Color.BLACK
-            sliceSpace = 3f
-
-            // Labels and Connecting Lines (Your preferred style)
-            xValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
-            yValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
-            valueLinePart1Length = 0.4f
-            valueLinePart2Length = 0.4f
-            valueLineWidth = 2f
-            valueLineColor = if (isDarkMode()) Color.WHITE else Color.BLACK
+            colors = listOf(
+                Color.parseColor("#42A5F5"), // Azure
+                Color.parseColor("#FFA726"), // Orange
+                Color.parseColor("#26C6DA")  // Cyan
+            )
+            valueTextSize = 12f
+            valueTextColor = Color.WHITE
         }
 
-        val pieData = PieData(dataSet)
-        chart.data = pieData
-
-        chart.apply {
+        pieChart?.apply {
+            data = PieData(dataSet)
             description.isEnabled = false
-
-            // Padding to prevent labels from cutting off
-            setExtraOffsets(25f, 10f, 25f, 10f)
-
-            // Modern Donut Look
-            holeRadius = 55f
-            transparentCircleRadius = 60f
+            legend.isEnabled = false
             setHoleColor(Color.TRANSPARENT)
-
-            centerText = "Overview"
-            setCenterTextColor(if (isDarkMode()) Color.WHITE else Color.BLACK)
-            setCenterTextSize(16f)
-
-            // Slice Label Styling
-            setEntryLabelColor(if (isDarkMode()) Color.WHITE else Color.BLACK)
-            setEntryLabelTextSize(12f)
-
-            legend.apply {
-                isEnabled = true
-                verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
-                horizontalAlignment = Legend.LegendHorizontalAlignment.CENTER
-                orientation = Legend.LegendOrientation.HORIZONTAL
-                textColor = if (isDarkMode()) Color.WHITE else Color.BLACK
-                yOffset = 5f
-            }
-
             animateY(1000)
             invalidate()
         }
     }
 
-    private fun isDarkMode(): Boolean {
-        return (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
-                Configuration.UI_MODE_NIGHT_YES
-    }
-
     override fun onDestroyView() {
+        complaintsListener?.let { complaintsRef?.removeEventListener(it) }
+        tvUserName = null; tvPending = null; tvProgress = null; tvCompleted = null
+        pieChart = null; mGoogleMap = null; homeScrollView = null
         super.onDestroyView()
-        // Clean up view references to prevent memory leaks on your HP laptop
-        tvUserName = null
-        tvPending = null
-        tvProgress = null
-        tvCompleted = null
-        pieChart = null
     }
 }

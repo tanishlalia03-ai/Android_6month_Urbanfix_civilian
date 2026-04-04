@@ -22,6 +22,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Urbanfix">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBOGAncHt9U76JyvmqJZIB4b0wLM47o4p0" />
         <activity
             android:name=".SignupActivity2"
             android:exported="false" />

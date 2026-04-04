@@ -1,8 +1,9 @@
 package com.example.urbanfix.bottomnavigation.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -23,24 +24,36 @@ class ComplaintsFragment : Fragment(R.layout.fragment_complaints) {
     private var adapter: ComplaintAdapter? = null
     private var fullList = listOf<ComplaintModel>()
 
-    // Remember the user's selection
+    // UI Components
+    private lateinit var progressBar: ProgressBar
+    private lateinit var tvNoData: TextView
+    private lateinit var recyclerView: RecyclerView
+
     private var currentFilterId: Int = R.id.chip_all
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val recyclerView = view.findViewById<RecyclerView>(R.id.rvComplaints)
+        // Initialize Views
+        recyclerView = view.findViewById(R.id.rvComplaints)
+        progressBar = view.findViewById(R.id.progressBar)
+        tvNoData = view.findViewById(R.id.tvNoData)
         val filterChipGroup = view.findViewById<ChipGroup>(R.id.filterChipGroup)
 
+        // Set up Adapter
         adapter = ComplaintAdapter(mutableListOf())
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
+
+        // Initial Loading State
+        showLoading(true)
 
         // Observe Data with Flow
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.complaints.collect { newList ->
                     fullList = newList
+                    showLoading(false)
                     // Re-apply the current filter whenever data changes
                     filterData(currentFilterId)
                 }
@@ -59,10 +72,29 @@ class ComplaintsFragment : Fragment(R.layout.fragment_complaints) {
             R.id.chip_pending -> fullList.filter { it.status == 0 }
             R.id.chip_active -> fullList.filter { it.status == 1 }
             R.id.chip_completed -> fullList.filter { it.status == 2 }
-            R.id.chip_favorite -> fullList.filter { it.validation == true } // Favorites
+            R.id.chip_favorite -> fullList.filter { it.validation == true }
             else -> fullList
         }
 
-        adapter?.updateList(filtered)
+        // Update UI based on filtered list size
+        if (filtered.isEmpty()) {
+            tvNoData.visibility = View.VISIBLE
+            recyclerView.visibility = View.GONE
+        } else {
+            tvNoData.visibility = View.GONE
+            recyclerView.visibility = View.VISIBLE
+            adapter?.updateList(filtered)
+        }
+    }
+
+    private fun showLoading(isLoading: Boolean) {
+        if (isLoading) {
+            progressBar.visibility = View.VISIBLE
+            recyclerView.visibility = View.GONE
+            tvNoData.visibility = View.GONE
+        } else {
+            progressBar.visibility = View.GONE
+            // RecyclerView visibility is handled inside filterData based on list size
+        }
     }
 }
