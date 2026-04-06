@@ -68,15 +68,33 @@
                 android:padding="16dp">
 
                 <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardImages"
                     android:layout_width="match_parent"
                     android:layout_height="280dp"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="2dp">
 
-                    <androidx.viewpager2.widget.ViewPager2
-                        android:id="@+id/viewPagerImages"
+                    <FrameLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+                        android:layout_height="match_parent">
+
+                        <androidx.viewpager2.widget.ViewPager2
+                            android:id="@+id/viewPagerImages"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+
+                        <com.google.android.material.tabs.TabLayout
+                            android:id="@+id/tabIndicator"
+                            android:layout_width="match_parent"
+                            android:layout_height="30dp"
+                            android:layout_gravity="bottom"
+                            android:background="@android:color/transparent"
+                            app:tabBackground="@drawable/tab_pager_selector"
+                            app:tabGravity="center"
+                            app:tabIndicatorHeight="0dp"
+                            app:tabPaddingStart="8dp"
+                            app:tabPaddingEnd="8dp"/>
+                    </FrameLayout>
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView

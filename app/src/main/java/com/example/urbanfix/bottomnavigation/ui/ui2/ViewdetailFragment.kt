@@ -17,6 +17,8 @@ import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.database.FirebaseDatabase
 import java.text.SimpleDateFormat
 import java.util.*
@@ -35,6 +37,7 @@ class ViewdetailFragment : Fragment(R.layout.fragment_viewdetail) {
         val tvDescription = view.findViewById<TextView>(R.id.tvDescription)
         val tvLocation = view.findViewById<TextView>(R.id.tvLocation)
         val viewPager = view.findViewById<ViewPager2>(R.id.viewPagerImages)
+        val tabLayout = view.findViewById<TabLayout>(R.id.tabIndicator)
         val pieChart = view.findViewById<PieChart>(R.id.complaintPieChart)
         val progressBar = view.findViewById<ProgressBar>(R.id.detailsProgressBar)
         val btnDelete = view.findViewById<MaterialButton>(R.id.btnDeleteComplaint)
@@ -45,12 +48,10 @@ class ViewdetailFragment : Fragment(R.layout.fragment_viewdetail) {
             val dbRef = FirebaseDatabase.getInstance().getReference("Complaints").child(complaintId)
 
             dbRef.get().addOnSuccessListener { snapshot ->
-                // Hide progress bar once data is fetched
                 progressBar.visibility = View.GONE
 
                 val model = snapshot.getValue(ComplaintModel::class.java)
                 model?.let { data ->
-                    // Binding Text Data
                     tvId.text = "Complaint Id: #${data.complaintId?.takeLast(5) ?: "N/A"}"
                     tvCategory.text = "Category: ${data.issueType ?: "General"}"
                     tvDescription.text = data.description ?: "No description provided."
@@ -72,13 +73,22 @@ class ViewdetailFragment : Fragment(R.layout.fragment_viewdetail) {
                     }
                     tvStatus.text = "Status: $statusText"
 
-                    // Setup Image Slider
+                    // Setup Image Slider with Dot Indicators
                     if (!data.images.isNullOrEmpty()) {
                         val adapter = ImageDisplayAdapter(data.images!!)
                         viewPager.adapter = adapter
+
+                        // Link Dots to ViewPager
+                        if (data.images!!.size > 1) {
+                            tabLayout.visibility = View.VISIBLE
+                            TabLayoutMediator(tabLayout, viewPager) { _, _ ->
+                                // No text needed for dots
+                            }.attach()
+                        } else {
+                            tabLayout.visibility = View.GONE
+                        }
                     }
 
-                    // Setup Chart
                     setupPieChart(pieChart, data.status ?: 0)
                 }
             }.addOnFailureListener {
@@ -86,17 +96,16 @@ class ViewdetailFragment : Fragment(R.layout.fragment_viewdetail) {
                 Toast.makeText(context, "Error fetching details", Toast.LENGTH_SHORT).show()
             }
 
-            // DELETE LOGIC
             btnDelete.setOnClickListener {
                 AlertDialog.Builder(requireContext())
                     .setTitle("Withdraw Complaint")
-                    .setMessage("Are you sure you want to delete this complaint? This cannot be undone.")
+                    .setMessage("Are you sure you want to delete this complaint?")
                     .setPositiveButton("Yes, Delete") { _, _ ->
                         progressBar.visibility = View.VISIBLE
                         dbRef.removeValue().addOnSuccessListener {
                             progressBar.visibility = View.GONE
                             Toast.makeText(context, "Successfully Withdrawn", Toast.LENGTH_SHORT).show()
-                            parentFragmentManager.popBackStack() // Go back to previous screen
+                            parentFragmentManager.popBackStack()
                         }.addOnFailureListener {
                             progressBar.visibility = View.GONE
                             Toast.makeText(context, "Failed to delete", Toast.LENGTH_SHORT).show()
