@@ -7,7 +7,6 @@ import android.view.MenuItem
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
@@ -26,18 +25,8 @@ class BottomLayoutActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val sharedPref = getSharedPreferences("Settings", Context.MODE_PRIVATE)
 
-        // --- 1. THEME MODE LOGIC (Dark/Light) ---
-        val savedThemeIndex = sharedPref.getInt("theme_mode_index", 2)
-        val mode = when (savedThemeIndex) {
-            0 -> AppCompatDelegate.MODE_NIGHT_NO
-            1 -> AppCompatDelegate.MODE_NIGHT_YES
-            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-        }
-        AppCompatDelegate.setDefaultNightMode(mode)
-
-        // --- 2. FONT SIZE & STYLE LOGIC ---
-        // We set the theme based on preferences. Note: In Android, only one
-        // setTheme() can be active, so we pick the most specific one.
+        // --- 1. FONT SIZE & STYLE LOGIC ---
+        // CRITICAL: Keep this BEFORE super.onCreate
         val fontSize = sharedPref.getString("font_size_key", "Medium")
         val fontStyleIndex = sharedPref.getInt("font_style_index", 0)
 
@@ -49,13 +38,16 @@ class BottomLayoutActivity : AppCompatActivity() {
             else -> setTheme(R.style.Theme_Urbanfix_Medium)
         }
 
+        // NOTE: We removed the AppCompatDelegate logic from here
+        // because UrbanFixApp handles it at startup now!
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_bottom_layout)
 
-
+        // Setup Status Bar
         window.statusBarColor = getColor(R.color.blue_main)
-        WindowCompat.getInsetsController(window,window.decorView).isAppearanceLightStatusBars = false
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -65,7 +57,13 @@ class BottomLayoutActivity : AppCompatActivity() {
         navController = navHostFragment.navController
 
         val appBarConfiguration = AppBarConfiguration(
-            setOf(R.id.navigation_home, R.id.navigation_profile, R.id.navigation_report, R.id.navigation_complaints)
+            setOf(
+                R.id.navigation_home,
+                R.id.navigation_report,
+                R.id.navigation_complaints,
+                R.id.navigation_notifications,
+                R.id.navigation_profile
+            )
         )
 
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -74,10 +72,13 @@ class BottomLayoutActivity : AppCompatActivity() {
         bottomNavigationView.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            if (destination.id == R.id.navigation_settings) {
-                bottomNavigationView.visibility = View.GONE
-            } else {
-                bottomNavigationView.visibility = View.VISIBLE
+            when (destination.id) {
+                R.id.navigation_settings, R.id.navigation_edit_profile, R.id.navigation_view_detail -> {
+                    bottomNavigationView.visibility = View.GONE
+                }
+                else -> {
+                    bottomNavigationView.visibility = View.VISIBLE
+                }
             }
         }
     }

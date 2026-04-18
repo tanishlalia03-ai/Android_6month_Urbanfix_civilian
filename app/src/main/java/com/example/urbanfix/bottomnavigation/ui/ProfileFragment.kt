@@ -1,5 +1,6 @@
 package com.example.urbanfix.bottomnavigation.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -7,8 +8,10 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.example.urbanfix.MainActivity
 import com.example.urbanfix.R
 import com.example.urbanfix.databinding.FragmentProfileBinding
+import com.example.urbanfix.firebase.UserModel
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -33,7 +36,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             findNavController().navigate(R.id.action_navigation_profile_to_editProfileFragment)
         }
 
-        // 2. Logout Logic (Updated ID to match the new mini button in header)
+        // 2. Logout Logic
         binding.btnLogoutMini.setOnClickListener {
             showLogoutBottomSheet()
         }
@@ -41,7 +44,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     private fun showLogoutBottomSheet() {
         val dialog = BottomSheetDialog(requireContext())
-        // Ensure this layout exists in your res/layout folder
         val view = layoutInflater.inflate(R.layout.layout_logout_bottom_sheet, null, false)
 
         val btnConfirm = view.findViewById<Button>(R.id.btn_confirm_logout)
@@ -49,11 +51,20 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         btnConfirm.setOnClickListener {
             dialog.dismiss()
-            auth.signOut()
-            Toast.makeText(requireContext(), "Logged Out Successfully", Toast.LENGTH_SHORT).show()
 
-            // Navigate back to Login Activity
+            // 1. Sign out from Firebase
+            auth.signOut()
+
+            // 2. Clear the Task Stack and redirect to Login
+            // Replace LoginActivity::class.java with your actual Login Activity class
+            val intent = Intent(requireContext(), MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+
+            // 3. Finish the host activity (usually the BottomNav activity)
             requireActivity().finish()
+
+            Toast.makeText(requireContext(), "Logged Out Successfully", Toast.LENGTH_SHORT).show()
         }
 
         btnCancel.setOnClickListener {
@@ -69,37 +80,29 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         // Show loading state
         binding.profileProgressBar.visibility = View.VISIBLE
-        // Note: Using alpha or invisible keeps the layout structure while loading
         binding.profileScrollView.visibility = View.INVISIBLE
 
         database.child(uid).get().addOnSuccessListener { snapshot ->
             // Safety check for Fragment lifecycle
             if (_binding == null || !isAdded) return@addOnSuccessListener
 
-            val name = snapshot.child("name").getValue(String::class.java)
-            val email = snapshot.child("email").getValue(String::class.java)
-            val phone = snapshot.child("phone").getValue(String::class.java)
-            val role = snapshot.child("role").getValue(String::class.java)
-            val address = snapshot.child("address").getValue(String::class.java)
-            val imagePath = snapshot.child("imageUrl").getValue(String::class.java)
+            val user = snapshot.getValue(UserModel::class.java)
 
-            // Update UI with Firebase Data
+            // Update UI using the user object
             binding.apply {
-                tvHeaderName.text = name ?: "User Name"
-                tvProfileEmail.text = email ?: "No Email Provided"
-                tvProfilePhone.text = phone ?: "No Phone Provided"
-
-                // Using the individual card TextViews from the new XML
-                tvProfileRole.text = role?.uppercase() ?: "USER"
-                tvProfileAddress.text = address ?: "No Address Added"
+                tvHeaderName.text = user?.name ?: "User Name"
+                tvProfileEmail.text = user?.email ?: "No Email Provided"
+                tvProfilePhone.text = user?.phone ?: "No Phone Provided"
+                tvProfileRole.text = user?.role?.uppercase() ?: "USER"
+                tvProfileAddress.text = user?.address ?: "No Address Added"
 
                 // Load Profile Image with Glide
-                if (!imagePath.isNullOrEmpty()) {
+                if (!user?.imageUrl.isNullOrEmpty()) {
                     Glide.with(this@ProfileFragment)
-                        .load(imagePath)
+                        .load(user?.imageUrl)
                         .placeholder(R.drawable.ic_person)
                         .error(R.drawable.ic_person)
-                        .circleCrop() // Modern circular look
+                        .circleCrop()
                         .into(ivProfileDisplay)
                 }
             }

@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import com.example.urbanfix.R
+import com.example.urbanfix.mode.UrbanFixApp // Import your combined App class
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class SettingFragment : Fragment(R.layout.fragment_setting) {
@@ -26,11 +27,9 @@ class SettingFragment : Fragment(R.layout.fragment_setting) {
 
         val sharedPref = requireActivity().getSharedPreferences("Settings", Context.MODE_PRIVATE)
 
-        // Initial UI Setup
+        // --- Initial UI Setup ---
         val savedFontSize = sharedPref.getString("font_size_key", "Medium") ?: "Medium"
         tvFontSize?.text = savedFontSize
-
-        // Manually apply size to this screen's views
         applySizeToView(view as ViewGroup, savedFontSize)
 
         val themeOptions = arrayOf("Light", "Dark", "System Default")
@@ -41,42 +40,45 @@ class SettingFragment : Fragment(R.layout.fragment_setting) {
         val savedStyleIndex = sharedPref.getInt("font_style_index", 0)
         tvFontStyle?.text = styleOptions[savedStyleIndex]
 
+        // --- Theme Selection ---
+        themeLayout?.setOnClickListener {
+            val currentTheme = sharedPref.getInt("theme_mode_index", 2)
+
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("App Theme")
+                .setSingleChoiceItems(themeOptions, currentTheme) { dialog, which ->
+                    // 1. Save the choice
+                    sharedPref.edit().putInt("theme_mode_index", which).apply()
+
+                    // 2. Update UI Text
+                    tvTheme?.text = themeOptions[which]
+
+                    // 3. Apply immediately using the static helper in UrbanFixApp
+                    UrbanFixApp.applyTheme(requireContext())
+
+                    dialog.dismiss()
+                }
+                .show()
+        }
+
+        // --- Font Size Selection ---
         fontLayout?.setOnClickListener {
             val options = arrayOf("Small", "Medium", "Large")
-            val checkedItem = options.indexOf(sharedPref.getString("font_size_key", "Medium"))
+            val currentSize = sharedPref.getString("font_size_key", "Medium")
+            val checkedItem = options.indexOf(currentSize)
 
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Select Font Size")
                 .setSingleChoiceItems(options, checkedItem) { dialog, which ->
-                    val selectedSize = options[which]
-                    sharedPref.edit().putString("font_size_key", selectedSize).apply()
-                    tvFontSize?.text = selectedSize
+                    sharedPref.edit().putString("font_size_key", options[which]).apply()
                     dialog.dismiss()
-                    requireActivity().recreate() // Restarts Activity to apply theme
+                    // Recreate activity to apply the new XML theme style
+                    requireActivity().recreate()
                 }
                 .show()
         }
 
-        themeLayout?.setOnClickListener {
-            val options = arrayOf("Light", "Dark", "System Default")
-            val checkedItem = sharedPref.getInt("theme_mode_index", 2)
-
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("App Theme")
-                .setSingleChoiceItems(options, checkedItem) { dialog, which ->
-                    tvTheme?.text = options[which]
-                    sharedPref.edit().putInt("theme_mode_index", which).apply()
-                    val mode = when (which) {
-                        0 -> AppCompatDelegate.MODE_NIGHT_NO
-                        1 -> AppCompatDelegate.MODE_NIGHT_YES
-                        else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                    }
-                    AppCompatDelegate.setDefaultNightMode(mode)
-                    dialog.dismiss()
-                }
-                .show()
-        }
-
+        // --- Font Style Selection ---
         styleLayout?.setOnClickListener {
             val options = arrayOf("Sans Serif", "Serif", "Monospace")
             val checkedItem = sharedPref.getInt("font_style_index", 0)
@@ -84,7 +86,6 @@ class SettingFragment : Fragment(R.layout.fragment_setting) {
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Font Style")
                 .setSingleChoiceItems(options, checkedItem) { dialog, which ->
-                    tvFontStyle?.text = options[which]
                     sharedPref.edit().putInt("font_style_index", which).apply()
                     dialog.dismiss()
                     requireActivity().recreate()
@@ -92,7 +93,6 @@ class SettingFragment : Fragment(R.layout.fragment_setting) {
         }
     }
 
-    // Helper to force change text sizes on this fragment specifically
     private fun applySizeToView(viewGroup: ViewGroup, sizeLabel: String) {
         val size = when (sizeLabel) {
             "Small" -> 14f
@@ -101,8 +101,11 @@ class SettingFragment : Fragment(R.layout.fragment_setting) {
         }
         for (i in 0 until viewGroup.childCount) {
             val child = viewGroup.getChildAt(i)
-            if (child is TextView) child.textSize = size
-            else if (child is ViewGroup) applySizeToView(child, sizeLabel)
+            if (child is TextView) {
+                child.textSize = size
+            } else if (child is ViewGroup) {
+                applySizeToView(child, sizeLabel)
+            }
         }
     }
 }

@@ -25,6 +25,12 @@
     </fragment>
 
     <fragment
+        android:id="@+id/navigation_notifications"
+        android:name="com.example.urbanfix.bottomnavigation.ui.NotificationsFragment"
+        android:label="Notifications"
+        tools:layout="@layout/fragment_notifications" />
+
+    <fragment
         android:id="@+id/navigation_profile"
         android:name="com.example.urbanfix.bottomnavigation.ui.ProfileFragment"
         android:label="Profile" >

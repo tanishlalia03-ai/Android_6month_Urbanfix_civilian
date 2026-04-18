@@ -103,4 +103,7 @@ dependencies {
     //maps
     implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("com.google.android.gms:play-services-location:21.3.0")
+
+    //ads
+    implementation("com.google.android.gms:play-services-ads:23.0.0")
 }

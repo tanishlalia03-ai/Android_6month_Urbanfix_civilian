@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.urbanfix.R
 import com.example.urbanfix.appwrite.AppwriteManager
 import com.example.urbanfix.databinding.FragmentReportBinding
+import com.example.urbanfix.fcm.NotificationSender
 import com.example.urbanfix.firebase.ComplaintModel
 import com.example.urbanfix.recyclerviewImage.ImagePreviewAdapter
 import com.google.android.gms.location.LocationServices
@@ -30,7 +32,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -43,6 +45,8 @@ class ReportFragment : Fragment() {
 
     private var _binding: FragmentReportBinding? = null
     private val binding get() = _binding!!
+
+    private val TAG = "URBANFIX_LOG"
 
     private val selectedImagesList = ArrayList<Uri>()
     private lateinit var imageAdapter: ImagePreviewAdapter
@@ -57,6 +61,7 @@ class ReportFragment : Fragment() {
     private val bucketID = "6996dc680036b04ee5f0"
     private var textClassifier: NLClassifier? = null
 
+    // Launchers
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { addImageToList(it) }
     }
@@ -83,28 +88,157 @@ class ReportFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupRecyclerView()
         setupCategoryDropdown()
 
+        // Load TFLite Model
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 textClassifier = NLClassifier.createFromFile(requireContext(), "text_classification.tflite")
-            } catch (e: Exception) { e.printStackTrace() }
+            } catch (e: Exception) { Log.e(TAG, "Model Load Fail: ${e.message}") }
         }
 
+        // Listeners
         binding.btnGallery.setOnClickListener { pickImageLauncher.launch("image/*") }
         binding.btnCamera.setOnClickListener {
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) openCamera()
             else requestCameraPermission.launch(Manifest.permission.CAMERA)
         }
-
         binding.btnCurrentLoc.setOnClickListener { checkLocationPermissions() }
         binding.btnManualLoc.setOnClickListener { showManualLocationDialog() }
-
         setupDateTimePickers()
+
         binding.btnSubmit.setOnClickListener { handleSubmit() }
     }
+
+    private fun handleSubmit() {
+        val title = binding.etTitle.text.toString().trim()
+        val desc = binding.etDescription.text.toString().trim()
+
+        // 1. Basic Empty Check
+        if (title.isEmpty() || desc.isEmpty()) {
+            Toast.makeText(context, "Please fill in all details", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 2. Manual Keyword Filter (Pre-check)
+        val blacklist = arrayOf(
+                "stupid", "idiot", "dumb", "pathetic", "useless", "nonsense", "crazy",
+                 "fool", "moron", "retard", "shut up", "get lost",
+                "incompetent", "lazy", "hell", "pissed", "annoying",
+                "fuck", "fucking", "bitch", "bastard", "asshole", "dick",
+                "piss", "pissed", "slut", "whore",
+        )
+        val isManualUnprofessional = blacklist.any { desc.contains(it, ignoreCase = true) }
+
+        if (isManualUnprofessional) {
+            binding.etDescription.error = "Please avoid using rude or unprofessional language."
+            Toast.makeText(context, " Unprofessional language detected", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 3. AI Sentiment Check (TFLite)
+        textClassifier?.let { classifier ->
+            val results = classifier.classify(desc)
+            val topResult = results.maxByOrNull { it.score }
+
+            Log.d(TAG, "AI Score: ${topResult?.label} (${topResult?.score})")
+
+            // If AI is more than 50% sure text is Negative/Unprofessional
+            if (topResult?.label == "Negative" && topResult.score > 0.4) {
+                binding.etDescription.error = "Our AI detected a rude tone. Please be more professional."
+                Toast.makeText(context, "AI Filter: Negative tone detected", Toast.LENGTH_SHORT).show()
+                return
+            }
+        }
+
+        // 4. If all checks pass, start upload
+        startSubmissionProcess()
+    }
+
+    private fun startSubmissionProcess() {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+        val civilianId = user.uid
+
+        if (selectedImagesList.isEmpty()) {
+            Toast.makeText(context, "Please add at least one image", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        binding.btnSubmit.isEnabled = false
+        binding.btnSubmit.text = "Submitting..."
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                // 1. Upload images
+                val urls = selectedImagesList.mapNotNull { appwriteManager.uploadAndGetUrl(requireContext(), bucketID, it) }
+                val dbRef = FirebaseDatabase.getInstance().getReference("Complaints")
+                val key = dbRef.push().key ?: ""
+
+                val priorityValue = when(binding.priorityToggle.checkedButtonId) {
+                    R.id.btnHigh -> 2
+                    R.id.btnMedium -> 1
+                    else -> 0
+                }
+
+                val reportTitle = binding.etTitle.text.toString().trim()
+                val reportCategory = binding.categorySpinner.text.toString()
+
+                val complaint = ComplaintModel(
+                    complaintId = key,
+                    title = reportTitle,
+                    description = binding.etDescription.text.toString(),
+                    issueType = reportCategory,
+                    images = ArrayList(urls),
+                    civilianId = civilianId,
+                    latitude = latitude,
+                    longitude = longitude,
+                    timeStamp = System.currentTimeMillis(),
+                    status = 0,
+                    priority = priorityValue,
+                    location = binding.tvSelectedLocation.text.toString()
+                )
+
+                // 2. Save to Firebase
+                dbRef.child(key).setValue(complaint).addOnSuccessListener {
+
+                    // 3. Notify Admin Side
+                    val adminMsgRef = FirebaseDatabase.getInstance().getReference("AdminMessages").push()
+                    adminMsgRef.setValue(mapOf(
+                        "title" to "New Report: $reportTitle",
+                        "body" to "Category: $reportCategory",
+                        "complaintId" to key,
+                        "civilianId" to civilianId
+                    ))
+
+                    // 4. Push Notification
+                    NotificationSender.sendNotificationToUser(
+                        fcmToken = "/topics/admin_notifications",
+                        title = "UrbanFix: $reportTitle",
+                        body = "Category: $reportCategory",
+                        key = key,
+                        context = requireContext(),
+                        type = "complaint_report",
+                        name = user.displayName ?: "Citizen",
+                        civilianId = civilianId
+                    )
+
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        Toast.makeText(requireContext(), "Report Submitted Successfully!", Toast.LENGTH_SHORT).show()
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    binding.btnSubmit.isEnabled = true
+                    binding.btnSubmit.text = "Submit"
+                    Log.e(TAG, "Submission Error: ${e.message}")
+                }
+            }
+        }
+    }
+
+    // --- Helper Methods ---
 
     private fun openCamera() {
         val photoFile = File(requireContext().cacheDir, "IMG_${System.currentTimeMillis()}.jpg")
@@ -126,7 +260,7 @@ class ReportFragment : Fragment() {
             selectedImagesList.add(uri)
             imageAdapter.notifyItemInserted(selectedImagesList.size - 1)
         } else {
-            Toast.makeText(context, "Max 3 images", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Maximum 3 images allowed", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -155,15 +289,14 @@ class ReportFragment : Fragment() {
 
     private fun showManualLocationDialog() {
         val input = EditText(requireContext())
-        input.hint = "e.g. Model Town, Ludhiana"
+        input.hint = "e.g. Model Town, Jalandhar"
         AlertDialog.Builder(requireContext())
             .setTitle("Manual Location")
-            .setMessage("Enter an address to find coordinates")
             .setView(input)
             .setPositiveButton("Set") { _, _ ->
                 val addressStr = input.text.toString().trim()
                 if (addressStr.isNotEmpty()) {
-                    binding.tvSelectedLocation.text = "Fetching coordinates..."
+                    binding.tvSelectedLocation.text = "Searching..."
                     lifecycleScope.launch(Dispatchers.IO) {
                         try {
                             val geocoder = Geocoder(requireContext(), Locale.getDefault())
@@ -173,14 +306,9 @@ class ReportFragment : Fragment() {
                                     latitude = addresses[0].latitude
                                     longitude = addresses[0].longitude
                                     binding.tvSelectedLocation.text = addressStr
-                                    Toast.makeText(requireContext(), "Location Linked", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    binding.tvSelectedLocation.text = "Error: Address Not Found"
                                 }
                             }
-                        } catch (e: Exception) {
-                            withContext(Dispatchers.Main) { binding.tvSelectedLocation.text = "Network Error" }
-                        }
+                        } catch (e: Exception) { }
                     }
                 }
             }
@@ -189,124 +317,33 @@ class ReportFragment : Fragment() {
     }
 
     private fun checkLocationPermissions() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fetchGPSLocation()
-        } else {
-            requestLocationPermission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
-        }
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) fetchGPSLocation()
+        else requestLocationPermission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
     }
 
     @SuppressLint("MissingPermission")
     private fun fetchGPSLocation() {
         val fusedClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-        binding.tvSelectedLocation.text = "Locating..."
-
-        fusedClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
-            .addOnSuccessListener { loc ->
-                loc?.let {
-                    this.latitude = it.latitude
-                    this.longitude = it.longitude
-                    lifecycleScope.launch {
-                        val address = getAddressFromCoords(it.latitude, it.longitude)
-                        binding.tvSelectedLocation.text = address
-                    }
-                }
+        binding.tvSelectedLocation.text = "Detecting Location..."
+        fusedClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).addOnSuccessListener { loc ->
+            loc?.let {
+                this.latitude = it.latitude; this.longitude = it.longitude
+                lifecycleScope.launch { binding.tvSelectedLocation.text = getAddressFromCoords(it.latitude, it.longitude) }
             }
+        }
     }
 
-    private suspend fun getAddressFromCoords(lat: Double, lng: Double): String {
-        return withContext(Dispatchers.IO) {
-            try {
-                val geocoder = Geocoder(requireContext(), Locale.getDefault())
-                val addresses = geocoder.getFromLocation(lat, lng, 1)
-                addresses?.firstOrNull()?.getAddressLine(0) ?: "Address not found"
-            } catch (e: Exception) { "Lat: $lat, Lng: $lng" }
-        }
+    private suspend fun getAddressFromCoords(lat: Double, lng: Double): String = withContext(Dispatchers.IO) {
+        try {
+            val geocoder = Geocoder(requireContext(), Locale.getDefault())
+            val addresses = geocoder.getFromLocation(lat, lng, 1)
+            addresses?.firstOrNull()?.getAddressLine(0) ?: "Unknown Address"
+        } catch (e: Exception) { "Lat: $lat, Lng: $lng" }
     }
 
     private fun setupCategoryDropdown() {
-        val categories = arrayOf(
-            "Pothole & Road Damage", "Garbage & Waste", "Street Light Outage",
-            "Water Leak & Pipe Burst", "Sewage & Clogged Drains", "Illegal Encroachment",
-            "Park & Playground Maintenance", "Stray Animal Menace", "Electricity Fault",
-            "Illegal Construction", "Public Toilet Hygiene", "Dangling Wires",
-            "Noise Pollution", "Dead Animal Removal", "Other"
-        )
+        val categories = arrayOf("Pothole & Road Damage", "Garbage & Waste", "Street Light Outage", "Water Leak & Pipe Burst", "Sewage & Clogged Drains", "Illegal Encroachment", "Park & Playground Maintenance", "Stray Animal Menace", "Electricity Fault", "Illegal Construction", "Public Toilet Hygiene", "Dangling Wires", "Noise Pollution", "Dead Animal Removal","Traffic Signal Failure", "Other")
         binding.categorySpinner.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, categories))
-    }
-
-    private fun handleSubmit() {
-        val title = binding.etTitle.text.toString().trim()
-        val desc = binding.etDescription.text.toString().trim()
-
-        if (title.isEmpty()) { binding.etTitle.error = "Title required"; return }
-        if (desc.isEmpty()) { binding.etDescription.error = "Description required"; return }
-
-        val wrongWords = arrayOf("stupid", "idiot", "dumb", "fool", "nonsense", "rubbish", "crap", "hell", "damn", "trash", "fuck", "shit", "bastard", "bitch")
-        for (word in wrongWords) {
-            if (desc.lowercase().contains(word)) {
-                binding.etDescription.error = "Inappropriate wording detected"; return
-            }
-        }
-
-        textClassifier?.let { classifier ->
-            val results = classifier.classify(desc)
-            val topResult = results.maxByOrNull { it.score }
-            if (topResult?.label == "Negative" && topResult.score > 0.45) {
-                binding.etDescription.error = "Please use professional wording"; return
-            }
-        }
-
-        startSubmissionProcess()
-    }
-
-    private fun startSubmissionProcess() {
-        val civilianId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        if (selectedImagesList.isEmpty()) {
-            Toast.makeText(context, "Add images", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        binding.btnSubmit.isEnabled = false
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val urls = selectedImagesList.mapNotNull { appwriteManager.uploadAndGetUrl(requireContext(), bucketID, it) }
-                val key = FirebaseDatabase.getInstance().getReference("Complaints").push().key ?: ""
-
-                val priority = when(binding.priorityToggle.checkedButtonId) {
-                    R.id.btnHigh -> 2
-                    R.id.btnMedium -> 1
-                    else -> 0
-                }
-
-                val complaint = ComplaintModel(
-                    complaintId = key,
-                    title = binding.etTitle.text.toString(),
-                    description = binding.etDescription.text.toString(),
-                    issueType = binding.categorySpinner.text.toString(),
-                    images = ArrayList(urls),
-                    civilianId = civilianId,
-                    latitude = latitude,
-                    longitude = longitude,
-                    timeStamp = System.currentTimeMillis(),
-                    status = 0,
-                    priority = priority,
-                    location = binding.tvSelectedLocation.text.toString()
-                )
-
-                withContext(Dispatchers.Main) {
-                    FirebaseDatabase.getInstance().getReference("Complaints").child(key).setValue(complaint).addOnSuccessListener {
-                        Toast.makeText(requireContext(), "Submitted!", Toast.LENGTH_SHORT).show()
-                        requireActivity().onBackPressedDispatcher.onBackPressed()
-                    }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    binding.btnSubmit.isEnabled = true
-                    Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
     }
 
     override fun onDestroyView() { super.onDestroyView(); _binding = null }

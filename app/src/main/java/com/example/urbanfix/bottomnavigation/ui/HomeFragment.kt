@@ -17,6 +17,9 @@ import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -37,6 +40,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     private var pieChart: PieChart? = null
     private var mGoogleMap: GoogleMap? = null
     private var homeScrollView: NestedScrollView? = null
+    private var mAdView: AdView? = null // AdView reference
 
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseDatabase.getInstance()
@@ -53,18 +57,20 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Initialize AdMob
+        MobileAds.initialize(requireContext()) {}
+        mAdView = view.findViewById(R.id.adView)
+        val adRequest = AdRequest.Builder().build()
+        mAdView?.loadAd(adRequest)
+
         tvUserName = view.findViewById(R.id.tv_user_name)
         tvPending = view.findViewById(R.id.tv_count_pending)
         tvProgress = view.findViewById(R.id.tv_count_progress)
         tvCompleted = view.findViewById(R.id.tv_count_completed)
         pieChart = view.findViewById(R.id.complaintsPieChart)
-
-        // Find the ScrollView and Map Container for touch logic
         homeScrollView = view.findViewById(R.id.home_scroll_view)
         val mapContainer = view.findViewById<View>(R.id.map_container)
 
-        // --- TOUCH INTERCEPT LOGIC ---
-        // Stops the page from scrolling when you move the map
         mapContainer.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -91,18 +97,12 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mGoogleMap = googleMap
-
         googleMap.uiSettings.apply {
             isScrollGesturesEnabled = true
             isZoomGesturesEnabled = true
-            isTiltGesturesEnabled = true
-            isRotateGesturesEnabled = true
             isZoomControlsEnabled = true
-            isMapToolbarEnabled = true
         }
-
         checkPermissionAndLoadMap()
-
         val uid = auth.currentUser?.uid ?: return
         listenToComplaints(uid)
     }
@@ -121,14 +121,10 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         try {
             mGoogleMap?.isMyLocationEnabled = true
             val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    val currentLatLng = LatLng(location.latitude, location.longitude)
-                    mGoogleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 14f))
-                } else {
-                    mGoogleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(31.3260, 75.5762), 11f))
-                }
+                val currentLatLng = if (location != null) LatLng(location.latitude, location.longitude)
+                else LatLng(31.3260, 75.5762)
+                mGoogleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 14f))
             }
         } catch (e: SecurityException) { e.printStackTrace() }
     }
@@ -138,7 +134,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         complaintsListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (!isAdded || mGoogleMap == null) return
-
                 var p = 0; var pr = 0; var c = 0
                 mGoogleMap?.clear()
 
@@ -156,22 +151,19 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
                     if (lat != null && lng != null) {
                         val hue = when(status) {
-                            0 -> BitmapDescriptorFactory.HUE_AZURE   // Pending
-                            1 -> BitmapDescriptorFactory.HUE_ORANGE  // Progress
-                            else -> BitmapDescriptorFactory.HUE_CYAN // Solved
+                            0 -> BitmapDescriptorFactory.HUE_AZURE
+                            1 -> BitmapDescriptorFactory.HUE_ORANGE
+                            else -> BitmapDescriptorFactory.HUE_CYAN
                         }
-
                         mGoogleMap?.addMarker(MarkerOptions()
                             .position(LatLng(lat, lng))
                             .title("Status: ${if(status==0) "Pending" else if(status==1) "Active" else "Solved"}")
                             .icon(BitmapDescriptorFactory.defaultMarker(hue)))
                     }
                 }
-
                 tvPending?.text = String.format("%02d", p)
                 tvProgress?.text = String.format("%02d", pr)
                 tvCompleted?.text = String.format("%02d", c)
-
                 updatePieChart(p, pr, c)
             }
             override fun onCancelled(error: DatabaseError) {}
@@ -184,6 +176,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             if (isAdded) tvUserName?.text = it.getValue(String::class.java) ?: "User"
         }
     }
+
     private fun updatePieChart(p: Int, pr: Int, c: Int) {
         val entries = ArrayList<PieEntry>()
         if (p > 0) entries.add(PieEntry(p.toFloat(), "Pending"))
@@ -191,11 +184,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         if (c > 0) entries.add(PieEntry(c.toFloat(), "Solved"))
 
         val dataSet = PieDataSet(entries, "").apply {
-            colors = listOf(
-                Color.parseColor("#42A5F5"), // Azure
-                Color.parseColor("#FFA726"), // Orange
-                Color.parseColor("#26C6DA")  // Cyan
-            )
+            colors = listOf(Color.parseColor("#42A5F5"), Color.parseColor("#FFA726"), Color.parseColor("#26C6DA"))
             valueTextSize = 12f
             valueTextColor = Color.WHITE
         }
@@ -210,10 +199,22 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         }
     }
 
+    // --- AD LIFECYCLE MANAGEMENT ---
+    override fun onPause() {
+        mAdView?.pause()
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mAdView?.resume()
+    }
+
     override fun onDestroyView() {
+        mAdView?.destroy() // Destroy ad to prevent memory leaks
         complaintsListener?.let { complaintsRef?.removeEventListener(it) }
         tvUserName = null; tvPending = null; tvProgress = null; tvCompleted = null
-        pieChart = null; mGoogleMap = null; homeScrollView = null
+        pieChart = null; mGoogleMap = null; homeScrollView = null; mAdView = null
         super.onDestroyView()
     }
 }
