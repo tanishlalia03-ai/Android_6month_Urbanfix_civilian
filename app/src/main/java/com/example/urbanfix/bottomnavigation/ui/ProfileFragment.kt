@@ -1,9 +1,14 @@
 package com.example.urbanfix.bottomnavigation.ui
 
+import android.app.Dialog
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
+import android.view.Window
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -28,67 +33,28 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentProfileBinding.bind(view)
 
-        // Load data from Firebase
         loadUserData()
 
-        // 1. Navigate to Edit Profile Fragment
         binding.btnEditProfile.setOnClickListener {
             findNavController().navigate(R.id.action_navigation_profile_to_editProfileFragment)
         }
 
-        // 2. Logout Logic
         binding.btnLogoutMini.setOnClickListener {
             showLogoutBottomSheet()
         }
     }
 
-    private fun showLogoutBottomSheet() {
-        val dialog = BottomSheetDialog(requireContext())
-        val view = layoutInflater.inflate(R.layout.layout_logout_bottom_sheet, null, false)
-
-        val btnConfirm = view.findViewById<Button>(R.id.btn_confirm_logout)
-        val btnCancel = view.findViewById<Button>(R.id.btn_cancel_logout)
-
-        btnConfirm.setOnClickListener {
-            dialog.dismiss()
-
-            // 1. Sign out from Firebase
-            auth.signOut()
-
-            // 2. Clear the Task Stack and redirect to Login
-            // Replace LoginActivity::class.java with your actual Login Activity class
-            val intent = Intent(requireContext(), MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-
-            // 3. Finish the host activity (usually the BottomNav activity)
-            requireActivity().finish()
-
-            Toast.makeText(requireContext(), "Logged Out Successfully", Toast.LENGTH_SHORT).show()
-        }
-
-        btnCancel.setOnClickListener {
-            dialog.dismiss()
-        }
-
-        dialog.setContentView(view)
-        dialog.show()
-    }
-
     private fun loadUserData() {
         val uid = auth.currentUser?.uid ?: return
 
-        // Show loading state
         binding.profileProgressBar.visibility = View.VISIBLE
         binding.profileScrollView.visibility = View.INVISIBLE
 
         database.child(uid).get().addOnSuccessListener { snapshot ->
-            // Safety check for Fragment lifecycle
             if (_binding == null || !isAdded) return@addOnSuccessListener
 
             val user = snapshot.getValue(UserModel::class.java)
 
-            // Update UI using the user object
             binding.apply {
                 tvHeaderName.text = user?.name ?: "User Name"
                 tvProfileEmail.text = user?.email ?: "No Email Provided"
@@ -96,14 +62,18 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 tvProfileRole.text = user?.role?.uppercase() ?: "USER"
                 tvProfileAddress.text = user?.address ?: "No Address Added"
 
-                // Load Profile Image with Glide
                 if (!user?.imageUrl.isNullOrEmpty()) {
+                    // 1. Load the small circular image
                     Glide.with(this@ProfileFragment)
                         .load(user?.imageUrl)
                         .placeholder(R.drawable.ic_person)
-                        .error(R.drawable.ic_person)
                         .circleCrop()
                         .into(ivProfileDisplay)
+
+                    // 2. Add click listener to show full image
+                    ivProfileDisplay.setOnClickListener {
+                        showFullImageDialog(user?.imageUrl!!)
+                    }
                 }
             }
 
@@ -117,6 +87,49 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    // --- NEW FUNCTION: Show Full Screen Image Dialog ---
+    private fun showFullImageDialog(imageUrl: String) {
+        val dialog = Dialog(requireContext(), android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(R.layout.layout_full_image_view)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.BLACK))
+
+        val fullImageView = dialog.findViewById<ImageView>(R.id.ivFullDisplay)
+        val btnClose = dialog.findViewById<ImageView>(R.id.btnCloseFullImage)
+
+        // Load image into the dialog
+        Glide.with(requireContext())
+            .load(imageUrl)
+            .placeholder(R.drawable.ic_person)
+            .into(fullImageView)
+
+        btnClose.setOnClickListener { dialog.dismiss() }
+
+        dialog.show()
+    }
+
+    private fun showLogoutBottomSheet() {
+        val dialog = BottomSheetDialog(requireContext())
+        val view = layoutInflater.inflate(R.layout.layout_logout_bottom_sheet, null, false)
+
+        val btnConfirm = view.findViewById<Button>(R.id.btn_confirm_logout)
+        val btnCancel = view.findViewById<Button>(R.id.btn_cancel_logout)
+
+        btnConfirm.setOnClickListener {
+            dialog.dismiss()
+            auth.signOut()
+            val intent = Intent(requireContext(), MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            requireActivity().finish()
+            Toast.makeText(requireContext(), "Logged Out Successfully", Toast.LENGTH_SHORT).show()
+        }
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+        dialog.setContentView(view)
+        dialog.show()
     }
 
     override fun onDestroyView() {

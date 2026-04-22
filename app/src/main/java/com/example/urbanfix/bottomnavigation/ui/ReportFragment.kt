@@ -61,7 +61,6 @@ class ReportFragment : Fragment() {
     private val bucketID = "6996dc680036b04ee5f0"
     private var textClassifier: NLClassifier? = null
 
-    // Launchers
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { addImageToList(it) }
     }
@@ -91,14 +90,12 @@ class ReportFragment : Fragment() {
         setupRecyclerView()
         setupCategoryDropdown()
 
-        // Load TFLite Model
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 textClassifier = NLClassifier.createFromFile(requireContext(), "text_classification.tflite")
             } catch (e: Exception) { Log.e(TAG, "Model Load Fail: ${e.message}") }
         }
 
-        // Listeners
         binding.btnGallery.setOnClickListener { pickImageLauncher.launch("image/*") }
         binding.btnCamera.setOnClickListener {
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) openCamera()
@@ -115,36 +112,29 @@ class ReportFragment : Fragment() {
         val title = binding.etTitle.text.toString().trim()
         val desc = binding.etDescription.text.toString().trim()
 
-        // 1. Basic Empty Check
         if (title.isEmpty() || desc.isEmpty()) {
             Toast.makeText(context, "Please fill in all details", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // 2. Manual Keyword Filter (Pre-check)
         val blacklist = arrayOf(
-                "stupid", "idiot", "dumb", "pathetic", "useless", "nonsense", "crazy",
-                 "fool", "moron", "retard", "shut up", "get lost",
-                "incompetent", "lazy", "hell", "pissed", "annoying",
-                "fuck", "fucking", "bitch", "bastard", "asshole", "dick",
-                "piss", "pissed", "slut", "whore",
+            "stupid", "idiot", "dumb", "pathetic", "useless", "nonsense", "crazy",
+            "fool", "moron", "retard", "shut up", "get lost",
+            "incompetent", "lazy", "hell", "pissed", "annoying",
+            "fuck", "fucking", "bitch", "bastard", "asshole", "dick",
+            "piss", "pissed", "slut", "whore",
         )
         val isManualUnprofessional = blacklist.any { desc.contains(it, ignoreCase = true) }
 
         if (isManualUnprofessional) {
             binding.etDescription.error = "Please avoid using rude or unprofessional language."
-            Toast.makeText(context, " Unprofessional language detected", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Unprofessional language detected", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // 3. AI Sentiment Check (TFLite)
         textClassifier?.let { classifier ->
             val results = classifier.classify(desc)
             val topResult = results.maxByOrNull { it.score }
-
-            Log.d(TAG, "AI Score: ${topResult?.label} (${topResult?.score})")
-
-            // If AI is more than 50% sure text is Negative/Unprofessional
             if (topResult?.label == "Negative" && topResult.score > 0.4) {
                 binding.etDescription.error = "Our AI detected a rude tone. Please be more professional."
                 Toast.makeText(context, "AI Filter: Negative tone detected", Toast.LENGTH_SHORT).show()
@@ -152,7 +142,6 @@ class ReportFragment : Fragment() {
             }
         }
 
-        // 4. If all checks pass, start upload
         startSubmissionProcess()
     }
 
@@ -170,10 +159,14 @@ class ReportFragment : Fragment() {
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                // 1. Upload images
                 val urls = selectedImagesList.mapNotNull { appwriteManager.uploadAndGetUrl(requireContext(), bucketID, it) }
                 val dbRef = FirebaseDatabase.getInstance().getReference("Complaints")
-                val key = dbRef.push().key ?: ""
+
+                // --- GENERATE SYSTEMATIC COMPLAINT ID ---
+                val datePart = SimpleDateFormat("yyyyMMdd-HHmm", Locale.getDefault()).format(Date())
+                val randomPart = UUID.randomUUID().toString().substring(0, 4).uppercase()
+                val systematicKey = "UF-$datePart-$randomPart"
+                // ----------------------------------------
 
                 val priorityValue = when(binding.priorityToggle.checkedButtonId) {
                     R.id.btnHigh -> 2
@@ -185,7 +178,7 @@ class ReportFragment : Fragment() {
                 val reportCategory = binding.categorySpinner.text.toString()
 
                 val complaint = ComplaintModel(
-                    complaintId = key,
+                    complaintId = systematicKey, // Using the new key
                     title = reportTitle,
                     description = binding.etDescription.text.toString(),
                     issueType = reportCategory,
@@ -199,24 +192,21 @@ class ReportFragment : Fragment() {
                     location = binding.tvSelectedLocation.text.toString()
                 )
 
-                // 2. Save to Firebase
-                dbRef.child(key).setValue(complaint).addOnSuccessListener {
+                dbRef.child(systematicKey).setValue(complaint).addOnSuccessListener {
 
-                    // 3. Notify Admin Side
                     val adminMsgRef = FirebaseDatabase.getInstance().getReference("AdminMessages").push()
                     adminMsgRef.setValue(mapOf(
                         "title" to "New Report: $reportTitle",
-                        "body" to "Category: $reportCategory",
-                        "complaintId" to key,
+                        "body" to "ID: $systematicKey | Category: $reportCategory",
+                        "complaintId" to systematicKey,
                         "civilianId" to civilianId
                     ))
 
-                    // 4. Push Notification
                     NotificationSender.sendNotificationToUser(
                         fcmToken = "/topics/admin_notifications",
                         title = "UrbanFix: $reportTitle",
-                        body = "Category: $reportCategory",
-                        key = key,
+                        body = "New $reportCategory reported ($systematicKey)",
+                        key = systematicKey,
                         context = requireContext(),
                         type = "complaint_report",
                         name = user.displayName ?: "Citizen",
@@ -237,8 +227,6 @@ class ReportFragment : Fragment() {
             }
         }
     }
-
-    // --- Helper Methods ---
 
     private fun openCamera() {
         val photoFile = File(requireContext().cacheDir, "IMG_${System.currentTimeMillis()}.jpg")

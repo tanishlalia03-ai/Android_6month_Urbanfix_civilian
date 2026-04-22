@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="5dp">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -86,11 +86,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:weightSum="3">
+                android:weightSum="3"
+                >
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="6dp"
-                    app:cardCornerRadius="16dp" app:cardElevation="0dp" app:cardBackgroundColor="#E3F2FD">
+                    app:cardCornerRadius="16dp" app:cardElevation="0dp"
+                    app:strokeWidth="0dp" app:cardBackgroundColor="#E3F2FD">
+
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:padding="16dp" android:orientation="vertical">
                         <TextView android:id="@+id/tv_count_pending" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="00" android:textColor="#1976D2" android:textSize="20sp" android:textStyle="bold" />
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Pending" android:textColor="#1976D2" android:textSize="11sp" android:textStyle="bold"/>
@@ -99,7 +102,8 @@
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginHorizontal="3dp"
-                    app:cardCornerRadius="16dp" app:cardElevation="0dp" app:cardBackgroundColor="#FFF3E0">
+                    app:cardCornerRadius="16dp" app:cardElevation="0dp"
+                    app:strokeWidth="0dp" app:cardBackgroundColor="#FFF3E0">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:padding="16dp" android:orientation="vertical">
                         <TextView android:id="@+id/tv_count_progress" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="00" android:textColor="#F57C00" android:textSize="20sp" android:textStyle="bold" />
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Active" android:textColor="#F57C00" android:textSize="11sp" android:textStyle="bold" />
@@ -108,7 +112,8 @@
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="6dp"
-                    app:cardCornerRadius="16dp" app:cardElevation="0dp" app:cardBackgroundColor="#E0F7FA">
+                    app:cardCornerRadius="16dp" app:cardElevation="0dp"
+                    app:strokeWidth="0dp" app:cardBackgroundColor="#E0F7FA">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:padding="16dp" android:orientation="vertical">
                         <TextView android:id="@+id/tv_count_completed" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="00" android:textColor="#0097A7" android:textSize="20sp" android:textStyle="bold" />
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Completed" android:textColor="#0097A7" android:textSize="11sp" android:textStyle="bold" />
@@ -130,9 +135,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
                 app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="?attr/colorOutlineVariant">
+                app:cardElevation="1dp"
+                app:strokeWidth="1dp">
                 <FrameLayout
                     android:id="@+id/map_container"
                     android:layout_width="match_parent"
@@ -144,13 +148,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 app:cardCornerRadius="24dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="?attr/colorOutlineVariant">
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
                 <LinearLayout android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="4dp">
                     <TextView android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Visual Analytics"
@@ -168,7 +171,8 @@
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="24dp"
                 app:cardCornerRadius="24dp"
-                app:cardElevation="4dp">
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
                 <ImageView android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"

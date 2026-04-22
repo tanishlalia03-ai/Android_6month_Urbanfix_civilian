@@ -73,7 +73,8 @@
             android:id="@+id/rvComplaints"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="3dp"
+            android:padding="7dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:listitem="@layout/item_complaints" />
 
