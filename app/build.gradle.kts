@@ -106,4 +106,7 @@ dependencies {
 
     //ads
     implementation("com.google.android.gms:play-services-ads:23.0.0")
+
+    //skeleton bar
+    implementation("com.facebook.shimmer:shimmer:0.5.0")
 }

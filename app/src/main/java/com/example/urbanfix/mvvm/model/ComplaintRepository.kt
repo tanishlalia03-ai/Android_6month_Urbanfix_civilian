@@ -1,5 +1,6 @@
 package com.example.urbanfix.mvvm.model
 
+import android.util.Log
 import com.example.urbanfix.firebase.ComplaintModel
 import com.google.firebase.database.*
 import kotlinx.coroutines.channels.awaitClose
@@ -7,13 +8,23 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
 class ComplaintRepository {
-    private val database = FirebaseDatabase.getInstance().getReference("Complaints")
+    private val rootRef = FirebaseDatabase.getInstance().getReference("Complaints")
 
-    fun getLiveComplaints(): Flow<List<ComplaintModel>> = callbackFlow {
+    fun getLiveComplaints(userId: String): Flow<List<ComplaintModel>> = callbackFlow {
+        // Pointing to: Complaints -> Specific User UID
+        val userComplaintsRef = rootRef.child(userId)
+
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                // This converts the Firebase data into your list of ComplaintModels
-                val items = snapshot.children.mapNotNull { it.getValue(ComplaintModel::class.java) }
+                val items = snapshot.children.mapNotNull {
+                    try {
+                        // This prevents the crash if data format is wrong
+                        it.getValue(ComplaintModel::class.java)
+                    } catch (e: Exception) {
+                        Log.e("ComplaintRepo", "Mapping Error: ${e.message}")
+                        null
+                    }
+                }
                 trySend(items)
             }
 
@@ -22,9 +33,8 @@ class ComplaintRepository {
             }
         }
 
-        database.addValueEventListener(listener)
+        userComplaintsRef.addValueEventListener(listener)
 
-        // Clean up the listener when not in use to save your HP laptop's resources
-        awaitClose { database.removeEventListener(listener) }
+        awaitClose { userComplaintsRef.removeEventListener(listener) }
     }
 }

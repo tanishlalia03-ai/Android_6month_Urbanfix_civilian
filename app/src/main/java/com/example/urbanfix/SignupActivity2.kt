@@ -4,6 +4,7 @@ import android.app.ProgressDialog
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -45,7 +46,6 @@ class SignupActivity2 : AppCompatActivity() {
     private val idProofPicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
             selectedIdUri = it
-            // Visual feedback that ID is selected
             Toast.makeText(this, "ID Proof Document Selected", Toast.LENGTH_SHORT).show()
         }
     }
@@ -62,7 +62,6 @@ class SignupActivity2 : AppCompatActivity() {
             setCancelable(false)
         }
 
-        // Listeners for Image Selection
         binding.cvProfileImage.setOnClickListener {
             profilePicker.launch("image/*")
         }
@@ -89,7 +88,7 @@ class SignupActivity2 : AppCompatActivity() {
             selectedImageUri == null -> Toast.makeText(this, "Please select a profile photo", Toast.LENGTH_SHORT).show()
             selectedIdUri == null -> Toast.makeText(this, "Please upload an ID Proof", Toast.LENGTH_SHORT).show()
             name.isEmpty() -> binding.tilFullName.error = "Name required"
-            !email.contains("@") -> binding.tilEmail.error = "Invalid email"
+            !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> binding.tilEmail.error = "Invalid email"
             mobile.length != 10 -> Toast.makeText(this, "Invalid Phone (10 digits)", Toast.LENGTH_SHORT).show()
             pass.length < 6 -> binding.tilPassword.error = "Min 6 chars"
             pass != confirmPass -> binding.tilConfirmPassword.error = "Passwords do not match"
@@ -104,7 +103,17 @@ class SignupActivity2 : AppCompatActivity() {
     private fun registerInAuth(email: String, pass: String, name: String, phone: String, address: String, role: String) {
         auth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                val uid = auth.currentUser?.uid ?: ""
+                val user = auth.currentUser
+                val uid = user?.uid ?: ""
+
+                // Send Verification Email
+                user?.sendEmailVerification()?.addOnCompleteListener { vTask ->
+                    if (vTask.isSuccessful) {
+                        Log.d("Signup", "Verification email sent.")
+                    }
+                }
+
+                // Proceed with file uploads and data saving
                 lifecycleScope.launch {
                     handleFileUploadsAndFirebase(uid, name, email, phone, address, role)
                 }
@@ -117,18 +126,16 @@ class SignupActivity2 : AppCompatActivity() {
 
     private suspend fun handleFileUploadsAndFirebase(uid: String, name: String, email: String, phone: String, address: String, role: String) {
         try {
-            // STEP 1: Upload Profile Image
+            // STEP 1: Upload to Appwrite
             val imageUrl = appwriteManager.uploadAndGetUrl(this, bucketID, selectedImageUri!!)
-
-            // STEP 2: Upload ID Proof
             val idUrl = appwriteManager.uploadAndGetUrl(this, bucketID, selectedIdUri!!)
 
             if (imageUrl == null || idUrl == null) {
-                cleanup("Failed to upload one or more documents.")
+                cleanup("Failed to upload documents to Appwrite.")
                 return
             }
 
-            // STEP 3: Get FCM Token and Save to Firebase
+            // STEP 2: Get FCM Token and Save to Realtime Database
             FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
                 val user = UserModel(
                     name, email, phone, address, uid,
@@ -137,7 +144,10 @@ class SignupActivity2 : AppCompatActivity() {
 
                 database.child("Users").child(uid).setValue(user).addOnSuccessListener {
                     progressDialog.dismiss()
-                    Toast.makeText(this, "Registration Successful!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Success! Check your email to verify account.", Toast.LENGTH_LONG).show()
+
+                    // Crucial: Sign out so they must login with verification check
+                    auth.signOut()
                     finish()
                 }.addOnFailureListener { cleanup(it.message) }
             }.addOnFailureListener { cleanup("FCM Token generation failed") }
@@ -149,7 +159,6 @@ class SignupActivity2 : AppCompatActivity() {
     }
 
     private fun cleanup(error: String?) {
-        // If anything fails after Auth creation, delete the Auth user to allow a retry
         auth.currentUser?.delete()?.addOnCompleteListener {
             progressDialog.dismiss()
             Toast.makeText(this, "Failed: $error", Toast.LENGTH_LONG).show()

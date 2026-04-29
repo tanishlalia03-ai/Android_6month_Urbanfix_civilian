@@ -40,7 +40,7 @@ class ComplaintsFragment : Fragment(R.layout.fragment_complaints) {
         tvNoData = view.findViewById(R.id.tvNoData)
         val filterChipGroup = view.findViewById<ChipGroup>(R.id.filterChipGroup)
 
-        // Set up Adapter
+        // Set up Adapter - initializing with an empty list
         adapter = ComplaintAdapter(mutableListOf())
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
@@ -52,7 +52,9 @@ class ComplaintsFragment : Fragment(R.layout.fragment_complaints) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.complaints.collect { newList ->
-                    fullList = newList
+                    // Guard against null or issues during data transition
+                    fullList = newList ?: emptyList()
+
                     showLoading(false)
                     // Re-apply the current filter whenever data changes
                     filterData(currentFilterId)
@@ -83,6 +85,7 @@ class ComplaintsFragment : Fragment(R.layout.fragment_complaints) {
         } else {
             tvNoData.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
+            // Safely update the adapter
             adapter?.updateList(filtered)
         }
     }
@@ -94,7 +97,7 @@ class ComplaintsFragment : Fragment(R.layout.fragment_complaints) {
             tvNoData.visibility = View.GONE
         } else {
             progressBar.visibility = View.GONE
-            // RecyclerView visibility is handled inside filterData based on list size
+
         }
     }
 }

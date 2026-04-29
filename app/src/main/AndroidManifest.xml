@@ -6,6 +6,7 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -15,7 +16,6 @@
 
     <application
         android:name=".mode.UrbanFixApp"
-
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -25,6 +25,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Urbanfix">
 
+        <!-- Notification Service (CRITICAL FOR POP-UPS) -->
+        <service
+            android:name=".firebase.UrbanFixMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -43,12 +51,12 @@
         <activity
             android:name=".constraintfiles.Constraint2Activity"
             android:exported="false" />
+
         <activity
             android:name=".splashscreen.SplashscreenActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

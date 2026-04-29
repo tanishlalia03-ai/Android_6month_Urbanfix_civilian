@@ -22,6 +22,7 @@ class NotificationsFragment : Fragment() {
 
     private lateinit var database: DatabaseReference
     private val notificationList = mutableListOf<NotificationModel>()
+    private lateinit var adapter: NotificationAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentNotificationsBinding.inflate(inflater, container, false)
@@ -33,6 +34,11 @@ class NotificationsFragment : Fragment() {
 
         // Setup RecyclerView
         binding.recyclerViewNotifications.layoutManager = LinearLayoutManager(context)
+        adapter = NotificationAdapter(notificationList)
+        binding.recyclerViewNotifications.adapter = adapter
+
+        // Start Shimmer Effect immediately
+        binding.shimmerViewContainer.startShimmer()
 
         fetchNotifications()
     }
@@ -41,7 +47,6 @@ class NotificationsFragment : Fragment() {
         val currentUser = FirebaseAuth.getInstance().currentUser?.uid ?: return
         database = FirebaseDatabase.getInstance().getReference("CivilianMessages")
 
-        // Query messages belonging ONLY to this user
         database.orderByChild("civilianId").equalTo(currentUser)
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -52,18 +57,33 @@ class NotificationsFragment : Fragment() {
                             notificationList.add(notification)
                         }
                     }
-                    // Sort by newest first
                     notificationList.sortByDescending { it.timestamp }
 
-                    // Link to Adapter
-                    binding.recyclerViewNotifications.adapter = NotificationAdapter(notificationList)
+                    // --- SHIMMER LOGIC START ---
+                    // Stop shimmer once data arrives
+                    binding.shimmerViewContainer.stopShimmer()
+                    binding.shimmerViewContainer.visibility = View.GONE
+
+                    // Show RecyclerView and update adapter
+                    binding.recyclerViewNotifications.visibility = View.VISIBLE
+                    adapter.notifyDataSetChanged()
+
+                    // Check if empty
+                    if (notificationList.isEmpty()) {
+                        binding.tvNoNotifications.visibility = View.VISIBLE
+                    } else {
+                        binding.tvNoNotifications.visibility = View.GONE
+                    }
+                    // --- SHIMMER LOGIC END ---
                 }
 
-                override fun onCancelled(error: DatabaseError) {}
+                override fun onCancelled(error: DatabaseError) {
+                    binding.shimmerViewContainer.stopShimmer()
+                    binding.shimmerViewContainer.visibility = View.GONE
+                }
             })
     }
 
-    // Simple Adapter inside the Fragment for ease
     inner class NotificationAdapter(private val list: List<NotificationModel>) :
         RecyclerView.Adapter<NotificationAdapter.ViewHolder>() {
 
@@ -88,6 +108,8 @@ class NotificationsFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        // Stop shimmer to save memory when fragment is destroyed
+        binding.shimmerViewContainer.stopShimmer()
         _binding = null
     }
-}
+} 

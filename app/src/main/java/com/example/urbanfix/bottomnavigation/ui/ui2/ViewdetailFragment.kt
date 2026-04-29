@@ -19,16 +19,19 @@ import com.github.mikephil.charting.data.PieEntry
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import java.text.SimpleDateFormat
 import java.util.*
 
 class ViewdetailFragment : Fragment(R.layout.fragment_viewdetail) {
 
+    private val auth = FirebaseAuth.getInstance()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Setup Views
+        // Setup Views
         val tvId = view.findViewById<TextView>(R.id.tvComplaintId)
         val tvCategory = view.findViewById<TextView>(R.id.tvCategory)
         val tvStatus = view.findViewById<TextView>(R.id.tvStatus)
@@ -43,53 +46,59 @@ class ViewdetailFragment : Fragment(R.layout.fragment_viewdetail) {
         val btnDelete = view.findViewById<MaterialButton>(R.id.btnDeleteComplaint)
 
         val complaintId = arguments?.getString("complaintId")
+        val currentUserId = auth.currentUser?.uid // GET CURRENT USER ID
 
-        if (complaintId != null) {
-            val dbRef = FirebaseDatabase.getInstance().getReference("Complaints").child(complaintId)
+        if (complaintId != null && currentUserId != null) {
+            // FIX: Point to the user-specific folder
+            val dbRef = FirebaseDatabase.getInstance()
+                .getReference("Complaints")
+                .child(currentUserId)
+                .child(complaintId)
 
             dbRef.get().addOnSuccessListener { snapshot ->
                 progressBar.visibility = View.GONE
 
-                val model = snapshot.getValue(ComplaintModel::class.java)
-                model?.let { data ->
-                    tvId.text = "Complaint Id: #${data.complaintId?.takeLast(5) ?: "N/A"}"
-                    tvCategory.text = "Category: ${data.issueType ?: "General"}"
-                    tvDescription.text = data.description ?: "No description provided."
-                    tvLocation.text = "Location: ${data.location ?: "Unknown"}"
-                    tvDate.text = "Date: ${formatDate(data.timeStamp)}"
+                if (snapshot.exists()) {
+                    val model = snapshot.getValue(ComplaintModel::class.java)
+                    model?.let { data ->
+                        // Bind UI data
+                        tvId.text = "Complaint Id: #${data.complaintId?.takeLast(5) ?: "N/A"}"
+                        tvCategory.text = "Category: ${data.issueType ?: "General"}"
+                        tvDescription.text = data.description ?: "No description provided."
+                        tvLocation.text = "Location: ${data.location ?: "Unknown"}"
+                        tvDate.text = "Date: ${formatDate(data.timeStamp)}"
 
-                    val priorityText = when(data.priority) {
-                        2 -> "High"
-                        1 -> "Medium"
-                        else -> "Low"
-                    }
-                    tvUrgency.text = "Urgency: $priorityText"
-
-                    val statusText = when(data.status) {
-                        0 -> "Pending"
-                        1 -> "In Progress"
-                        2 -> "Completed"
-                        else -> "Unknown"
-                    }
-                    tvStatus.text = "Status: $statusText"
-
-                    // Setup Image Slider with Dot Indicators
-                    if (!data.images.isNullOrEmpty()) {
-                        val adapter = ImageDisplayAdapter(data.images!!)
-                        viewPager.adapter = adapter
-
-                        // Link Dots to ViewPager
-                        if (data.images!!.size > 1) {
-                            tabLayout.visibility = View.VISIBLE
-                            TabLayoutMediator(tabLayout, viewPager) { _, _ ->
-                                // No text needed for dots
-                            }.attach()
-                        } else {
-                            tabLayout.visibility = View.GONE
+                        val priorityText = when(data.priority ?: 0) {
+                            2 -> "High"
+                            1 -> "Medium"
+                            else -> "Low"
                         }
-                    }
+                        tvUrgency.text = "Urgency: $priorityText"
 
-                    setupPieChart(pieChart, data.status ?: 0)
+                        val statusText = when(data.status ?: 0) {
+                            0 -> "Pending"
+                            1 -> "In Progress"
+                            2 -> "Completed"
+                            else -> "Unknown"
+                        }
+                        tvStatus.text = "Status: $statusText"
+
+                        // Image Slider Logic
+                        if (!data.images.isNullOrEmpty()) {
+                            val adapter = ImageDisplayAdapter(data.images!!)
+                            viewPager.adapter = adapter
+
+                            if (data.images!!.size > 1) {
+                                tabLayout.visibility = View.VISIBLE
+                                TabLayoutMediator(tabLayout, viewPager) { _, _ -> }.attach()
+                            } else {
+                                tabLayout.visibility = View.GONE
+                            }
+                        }
+                        setupPieChart(pieChart, data.status ?: 0)
+                    }
+                } else {
+                    Toast.makeText(context, "Complaint no longer exists", Toast.LENGTH_SHORT).show()
                 }
             }.addOnFailureListener {
                 progressBar.visibility = View.GONE
@@ -117,12 +126,12 @@ class ViewdetailFragment : Fragment(R.layout.fragment_viewdetail) {
 
         } else {
             progressBar.visibility = View.GONE
-            Toast.makeText(context, "Complaint ID not found", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Authorization or ID error", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun formatDate(timestamp: Long?): String {
-        if (timestamp == null) return "N/A"
+        if (timestamp == null || timestamp == 0L) return "N/A"
         return SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(timestamp))
     }
 

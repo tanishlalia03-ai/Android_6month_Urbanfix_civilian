@@ -160,13 +160,13 @@ class ReportFragment : Fragment() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val urls = selectedImagesList.mapNotNull { appwriteManager.uploadAndGetUrl(requireContext(), bucketID, it) }
-                val dbRef = FirebaseDatabase.getInstance().getReference("Complaints")
 
-                // --- GENERATE SYSTEMATIC COMPLAINT ID ---
+                // --- FIX APPLIED: Data is now nested under the User's UID ---
+                val dbRef = FirebaseDatabase.getInstance().getReference("Complaints").child(civilianId)
+
                 val datePart = SimpleDateFormat("yyyyMMdd-HHmm", Locale.getDefault()).format(Date())
                 val randomPart = UUID.randomUUID().toString().substring(0, 4).uppercase()
                 val systematicKey = "UF-$datePart-$randomPart"
-                // ----------------------------------------
 
                 val priorityValue = when(binding.priorityToggle.checkedButtonId) {
                     R.id.btnHigh -> 2
@@ -178,7 +178,7 @@ class ReportFragment : Fragment() {
                 val reportCategory = binding.categorySpinner.text.toString()
 
                 val complaint = ComplaintModel(
-                    complaintId = systematicKey, // Using the new key
+                    complaintId = systematicKey,
                     title = reportTitle,
                     description = binding.etDescription.text.toString(),
                     issueType = reportCategory,
@@ -192,6 +192,7 @@ class ReportFragment : Fragment() {
                     location = binding.tvSelectedLocation.text.toString()
                 )
 
+                // Saves to: Complaints -> {civilianId} -> {systematicKey}
                 dbRef.child(systematicKey).setValue(complaint).addOnSuccessListener {
 
                     val adminMsgRef = FirebaseDatabase.getInstance().getReference("AdminMessages").push()

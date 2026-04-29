@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="2dp"
+    android:padding="1dp"
     tools:context=".bottomnavigation.ui.ComplaintsFragment">
 
     <HorizontalScrollView
@@ -74,7 +74,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="3dp"
-            android:padding="7dp"
+            android:padding="1dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:listitem="@layout/item_complaints" />
 

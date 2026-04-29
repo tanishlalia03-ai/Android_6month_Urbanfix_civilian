@@ -9,6 +9,23 @@
     android:id="@+id/main"
     android:background="?android:attr/windowBackground">
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/loginGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:constraint_referenced_ids="tvLoginTitle,tvLoginSubtitle,emailInputLayout,passwordInputLayout,cbRememberMe,tvForgotPassword,btnLogin,layoutSignUp" />
+
     <TextView
         android:id="@+id/tvLoginTitle"
         android:layout_width="wrap_content"
@@ -112,6 +129,7 @@
         app:layout_constraintTop_toBottomOf="@id/cbRememberMe" />
 
     <LinearLayout
+        android:id="@+id/layoutSignUp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"

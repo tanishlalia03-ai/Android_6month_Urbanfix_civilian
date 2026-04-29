@@ -40,12 +40,12 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     private var pieChart: PieChart? = null
     private var mGoogleMap: GoogleMap? = null
     private var homeScrollView: NestedScrollView? = null
-    private var mAdView: AdView? = null // AdView reference
+    private var mAdView: AdView? = null
 
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseDatabase.getInstance()
     private var complaintsListener: ValueEventListener? = null
-    private var complaintsRef: DatabaseReference? = null
+    private var userComplaintsRef: DatabaseReference? = null
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -57,11 +57,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize AdMob
         MobileAds.initialize(requireContext()) {}
         mAdView = view.findViewById(R.id.adView)
-        val adRequest = AdRequest.Builder().build()
-        mAdView?.loadAd(adRequest)
+        mAdView?.loadAd(AdRequest.Builder().build())
 
         tvUserName = view.findViewById(R.id.tv_user_name)
         tvPending = view.findViewById(R.id.tv_count_pending)
@@ -91,8 +89,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             .commit()
         mapFragment.getMapAsync(this)
 
-        val uid = auth.currentUser?.uid ?: return
-        fetchUserName(uid)
+        auth.currentUser?.uid?.let { fetchUserName(it) }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -103,8 +100,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             isZoomControlsEnabled = true
         }
         checkPermissionAndLoadMap()
-        val uid = auth.currentUser?.uid ?: return
-        listenToComplaints(uid)
+        auth.currentUser?.uid?.let { listenToUserComplaints(it) }
     }
 
     private fun checkPermissionAndLoadMap() {
@@ -129,46 +125,60 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         } catch (e: SecurityException) { e.printStackTrace() }
     }
 
-    private fun listenToComplaints(uid: String) {
-        complaintsRef = db.getReference("Complaints")
+    private fun listenToUserComplaints(uid: String) {
+        // FIX: Point specifically to the logged-in user's folder
+        userComplaintsRef = db.getReference("Complaints").child(uid)
+
         complaintsListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (!isAdded || mGoogleMap == null) return
+
                 var p = 0; var pr = 0; var c = 0
                 mGoogleMap?.clear()
 
                 for (ds in snapshot.children) {
                     val status = ds.child("status").getValue(Int::class.java) ?: 0
-                    val cId = ds.child("civilianId").getValue(String::class.java)
                     val lat = ds.child("latitude").getValue(Double::class.java)
                     val lng = ds.child("longitude").getValue(Double::class.java)
 
-                    if (cId == uid) {
-                        when (status) {
-                            0 -> p++; 1 -> pr++; 2 -> c++
-                        }
+                    // Increment counters based on status
+                    when (status) {
+                        0 -> p++
+                        1 -> pr++
+                        2 -> c++
                     }
 
+                    // Add Markers to Map
                     if (lat != null && lng != null) {
                         val hue = when(status) {
-                            0 -> BitmapDescriptorFactory.HUE_AZURE
-                            1 -> BitmapDescriptorFactory.HUE_ORANGE
-                            else -> BitmapDescriptorFactory.HUE_CYAN
+                            0 -> BitmapDescriptorFactory.HUE_RED      // Pending
+                            1 -> BitmapDescriptorFactory.HUE_ORANGE   // Active
+                            else -> BitmapDescriptorFactory.HUE_GREEN // Solved
                         }
+
+                        val statusLabel = when(status) {
+                            0 -> "Pending"
+                            1 -> "Active"
+                            else -> "Solved"
+                        }
+
                         mGoogleMap?.addMarker(MarkerOptions()
                             .position(LatLng(lat, lng))
-                            .title("Status: ${if(status==0) "Pending" else if(status==1) "Active" else "Solved"}")
+                            .title("Status: $statusLabel")
                             .icon(BitmapDescriptorFactory.defaultMarker(hue)))
                     }
                 }
+
+                // Update UI Texts
                 tvPending?.text = String.format("%02d", p)
                 tvProgress?.text = String.format("%02d", pr)
                 tvCompleted?.text = String.format("%02d", c)
+
                 updatePieChart(p, pr, c)
             }
             override fun onCancelled(error: DatabaseError) {}
         }
-        complaintsRef?.addValueEventListener(complaintsListener!!)
+        userComplaintsRef?.addValueEventListener(complaintsListener!!)
     }
 
     private fun fetchUserName(uid: String) {
@@ -183,8 +193,17 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         if (pr > 0) entries.add(PieEntry(pr.toFloat(), "Active"))
         if (c > 0) entries.add(PieEntry(c.toFloat(), "Solved"))
 
+        if (entries.isEmpty()) {
+            pieChart?.clear()
+            return
+        }
+
         val dataSet = PieDataSet(entries, "").apply {
-            colors = listOf(Color.parseColor("#42A5F5"), Color.parseColor("#FFA726"), Color.parseColor("#26C6DA"))
+            colors = listOf(
+                Color.parseColor("#EF5350"), // Red for Pending
+                Color.parseColor("#FFA726"), // Orange for Active
+                Color.parseColor("#66BB6A")  // Green for Solved
+            )
             valueTextSize = 12f
             valueTextColor = Color.WHITE
         }
@@ -199,7 +218,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         }
     }
 
-    // --- AD LIFECYCLE MANAGEMENT ---
     override fun onPause() {
         mAdView?.pause()
         super.onPause()
@@ -211,8 +229,10 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     }
 
     override fun onDestroyView() {
-        mAdView?.destroy() // Destroy ad to prevent memory leaks
-        complaintsListener?.let { complaintsRef?.removeEventListener(it) }
+        mAdView?.destroy()
+        complaintsListener?.let { userComplaintsRef?.removeEventListener(it) }
+
+        // Clean up references for memory
         tvUserName = null; tvPending = null; tvProgress = null; tvCompleted = null
         pieChart = null; mGoogleMap = null; homeScrollView = null; mAdView = null
         super.onDestroyView()

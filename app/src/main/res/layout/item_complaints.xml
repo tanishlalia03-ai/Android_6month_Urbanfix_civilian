@@ -5,25 +5,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="2dp"
+    android:layout_marginHorizontal="6dp"
     android:layout_marginVertical="1dp"
     app:cardCornerRadius="8dp"
     app:cardElevation="0dp"
     app:strokeWidth="0dp"
+    app:cardBackgroundColor="?attr/colorSurface"
     android:foreground="?attr/selectableItemBackground">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:padding="10dp">
+
         <TextView
-            android:id="@+id/tvComplaintId"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvComplaintTitle"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:text="#12345"
-            android:textColor="?attr/colorPrimary"
-            android:textSize="14sp"
+            android:layout_marginEnd="12dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Street Light Not Working"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="16sp"
             android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/tvDateTime"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -31,28 +37,26 @@
             android:id="@+id/tvDateTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="10dp"
-            android:paddingRight="20dp"
-            android:text="14 Feb, 12:30 PM"
+            android:text="12:30 PM"
             android:textColor="?android:attr/textColorSecondary"
-            android:textSize="11sp"
+            android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@+id/tvComplaintTitle" />
 
         <TextView
-            android:id="@+id/tvStatus"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvComplaintDescription"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:paddingHorizontal="6dp"
-            android:paddingVertical="1dp"
-            android:text="Pending"
-            android:textColor="#D32F2F"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="The light has been flickering since Monday..."
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@+id/ivStar"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvComplaintId" />
+            app:layout_constraintTop_toBottomOf="@+id/tvComplaintTitle" />
 
         <CheckBox
             android:id="@+id/ivStar"
@@ -61,28 +65,21 @@
             android:background="@null"
             android:button="@android:drawable/btn_star_big_off"
             android:buttonTint="?attr/colorPrimary"
-            android:layout_marginEnd="10dp"
-            android:scaleX="0.75"
-            android:scaleY="0.75"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/tvStatus" />
+            app:layout_constraintTop_toBottomOf="@+id/tvDateTime" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnViewDetail"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+        <TextView
+            android:id="@+id/tvStatus"
             android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:minHeight="0dp"
-            android:layout_marginEnd="10dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:text="View Detail"
-            android:textAllCaps="false"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Pending"
+            android:textColor="#D32F2F"
             android:textSize="11sp"
-            app:layout_constraintBottom_toBottomOf="@+id/ivStar"
-            app:layout_constraintEnd_toStartOf="@+id/ivStar"
-            app:layout_constraintTop_toTopOf="@+id/ivStar" />
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvComplaintDescription" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>
