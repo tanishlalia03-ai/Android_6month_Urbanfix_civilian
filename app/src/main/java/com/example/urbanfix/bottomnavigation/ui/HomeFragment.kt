@@ -200,9 +200,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
         val dataSet = PieDataSet(entries, "").apply {
             colors = listOf(
-                Color.parseColor("#EF5350"), // Red for Pending
-                Color.parseColor("#FFA726"), // Orange for Active
-                Color.parseColor("#66BB6A")  // Green for Solved
+                Color.parseColor("#1976D2"), // Deep Blue (Matches Pending text)
+                Color.parseColor("#F57C00"), // Deep Orange (Matches Active text)
+                Color.parseColor("#0097A7")  // Green for Solved
             )
             valueTextSize = 12f
             valueTextColor = Color.WHITE

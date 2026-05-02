@@ -5,5 +5,6 @@ data class NotificationModel(
     val body: String = "",
     val civilianId: String = "",
     val timestamp: Long = 0L,
-    val complaintId: String = ""
+    val complaintId: String = "",
+    val read: Boolean = false
 )

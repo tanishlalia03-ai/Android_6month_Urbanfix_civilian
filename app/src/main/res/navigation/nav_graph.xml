@@ -28,7 +28,17 @@
         android:id="@+id/navigation_notifications"
         android:name="com.example.urbanfix.bottomnavigation.ui.NotificationsFragment"
         android:label="Notifications"
-        tools:layout="@layout/fragment_notifications" />
+        tools:layout="@layout/fragment_notifications">
+
+        <action
+            android:id="@+id/action_notifications_to_viewDetail"
+            app:destination="@id/navigation_notification_detail" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_notification_detail"
+        android:name="com.example.urbanfix.bottomnavigation.ui.ui2.Notification_detailFragment"
+        android:label="Message Details"
+        tools:layout="@layout/fragment_notification_detail" />
 
     <fragment
         android:id="@+id/navigation_profile"

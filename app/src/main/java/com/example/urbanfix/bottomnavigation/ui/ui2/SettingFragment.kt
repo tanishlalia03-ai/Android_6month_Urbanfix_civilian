@@ -6,10 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import com.example.urbanfix.R
-import com.example.urbanfix.mode.UrbanFixApp // Import your combined App class
+import com.example.urbanfix.mode.UrbanFixApp
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class SettingFragment : Fragment(R.layout.fragment_setting) {

@@ -3,21 +3,17 @@ package com.example.urbanfix.bottomnavigation.ui.ui2
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import android.widget.ProgressBar
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.viewpager2.widget.ViewPager2
 import com.example.urbanfix.R
+import com.example.urbanfix.databinding.FragmentViewdetailBinding // Ensure this matches your layout name
 import com.example.urbanfix.firebase.ComplaintModel
 import com.example.urbanfix.recyclerview.ImageDisplayAdapter
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -26,54 +22,43 @@ import java.util.*
 
 class ViewdetailFragment : Fragment(R.layout.fragment_viewdetail) {
 
+    private var _binding: FragmentViewdetailBinding? = null
+    private val binding get() = _binding!!
+
     private val auth = FirebaseAuth.getInstance()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Setup Views
-        val tvId = view.findViewById<TextView>(R.id.tvComplaintId)
-        val tvCategory = view.findViewById<TextView>(R.id.tvCategory)
-        val tvStatus = view.findViewById<TextView>(R.id.tvStatus)
-        val tvUrgency = view.findViewById<TextView>(R.id.tvUrgency)
-        val tvDate = view.findViewById<TextView>(R.id.tvDate)
-        val tvDescription = view.findViewById<TextView>(R.id.tvDescription)
-        val tvLocation = view.findViewById<TextView>(R.id.tvLocation)
-        val viewPager = view.findViewById<ViewPager2>(R.id.viewPagerImages)
-        val tabLayout = view.findViewById<TabLayout>(R.id.tabIndicator)
-        val pieChart = view.findViewById<PieChart>(R.id.complaintPieChart)
-        val progressBar = view.findViewById<ProgressBar>(R.id.detailsProgressBar)
-        val btnDelete = view.findViewById<MaterialButton>(R.id.btnDeleteComplaint)
+        _binding = FragmentViewdetailBinding.bind(view)
 
         val complaintId = arguments?.getString("complaintId")
-        val currentUserId = auth.currentUser?.uid // GET CURRENT USER ID
+        val currentUserId = auth.currentUser?.uid
 
         if (complaintId != null && currentUserId != null) {
-            // FIX: Point to the user-specific folder
             val dbRef = FirebaseDatabase.getInstance()
                 .getReference("Complaints")
                 .child(currentUserId)
                 .child(complaintId)
 
             dbRef.get().addOnSuccessListener { snapshot ->
-                progressBar.visibility = View.GONE
+                binding.detailsProgressBar.visibility = View.GONE
 
                 if (snapshot.exists()) {
                     val model = snapshot.getValue(ComplaintModel::class.java)
                     model?.let { data ->
-                        // Bind UI data
-                        tvId.text = "Complaint Id: #${data.complaintId?.takeLast(5) ?: "N/A"}"
-                        tvCategory.text = "Category: ${data.issueType ?: "General"}"
-                        tvDescription.text = data.description ?: "No description provided."
-                        tvLocation.text = "Location: ${data.location ?: "Unknown"}"
-                        tvDate.text = "Date: ${formatDate(data.timeStamp)}"
+                        // Bind UI data using binding object
+                        binding.tvComplaintId.text = "Complaint Id: #${data.complaintId?.takeLast(5) ?: "N/A"}"
+                        binding.tvCategory.text = "Category: ${data.issueType ?: "General"}"
+                        binding.tvDescription.text = data.description ?: "No description provided."
+                        binding.tvLocation.text = "Location: ${data.location ?: "Unknown"}"
+                        binding.tvDate.text = "Date: ${formatDate(data.timeStamp)}"
 
                         val priorityText = when(data.priority ?: 0) {
                             2 -> "High"
                             1 -> "Medium"
                             else -> "Low"
                         }
-                        tvUrgency.text = "Urgency: $priorityText"
+                        binding.tvUrgency.text = "Urgency: $priorityText"
 
                         val statusText = when(data.status ?: 0) {
                             0 -> "Pending"
@@ -81,42 +66,42 @@ class ViewdetailFragment : Fragment(R.layout.fragment_viewdetail) {
                             2 -> "Completed"
                             else -> "Unknown"
                         }
-                        tvStatus.text = "Status: $statusText"
+                        binding.tvStatus.text = "Status: $statusText"
 
                         // Image Slider Logic
                         if (!data.images.isNullOrEmpty()) {
                             val adapter = ImageDisplayAdapter(data.images!!)
-                            viewPager.adapter = adapter
+                            binding.viewPagerImages.adapter = adapter
 
                             if (data.images!!.size > 1) {
-                                tabLayout.visibility = View.VISIBLE
-                                TabLayoutMediator(tabLayout, viewPager) { _, _ -> }.attach()
+                                binding.tabIndicator.visibility = View.VISIBLE
+                                TabLayoutMediator(binding.tabIndicator, binding.viewPagerImages) { _, _ -> }.attach()
                             } else {
-                                tabLayout.visibility = View.GONE
+                                binding.tabIndicator.visibility = View.GONE
                             }
                         }
-                        setupPieChart(pieChart, data.status ?: 0)
+                        setupPieChart(binding.complaintPieChart, data.status ?: 0)
                     }
                 } else {
                     Toast.makeText(context, "Complaint no longer exists", Toast.LENGTH_SHORT).show()
                 }
             }.addOnFailureListener {
-                progressBar.visibility = View.GONE
+                binding.detailsProgressBar.visibility = View.GONE
                 Toast.makeText(context, "Error fetching details", Toast.LENGTH_SHORT).show()
             }
 
-            btnDelete.setOnClickListener {
+            binding.btnDeleteComplaint.setOnClickListener {
                 AlertDialog.Builder(requireContext())
                     .setTitle("Withdraw Complaint")
                     .setMessage("Are you sure you want to delete this complaint?")
                     .setPositiveButton("Yes, Delete") { _, _ ->
-                        progressBar.visibility = View.VISIBLE
+                        binding.detailsProgressBar.visibility = View.VISIBLE
                         dbRef.removeValue().addOnSuccessListener {
-                            progressBar.visibility = View.GONE
+                            binding.detailsProgressBar.visibility = View.GONE
                             Toast.makeText(context, "Successfully Withdrawn", Toast.LENGTH_SHORT).show()
                             parentFragmentManager.popBackStack()
                         }.addOnFailureListener {
-                            progressBar.visibility = View.GONE
+                            binding.detailsProgressBar.visibility = View.GONE
                             Toast.makeText(context, "Failed to delete", Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -125,7 +110,7 @@ class ViewdetailFragment : Fragment(R.layout.fragment_viewdetail) {
             }
 
         } else {
-            progressBar.visibility = View.GONE
+            binding.detailsProgressBar.visibility = View.GONE
             Toast.makeText(context, "Authorization or ID error", Toast.LENGTH_SHORT).show()
         }
     }
@@ -164,5 +149,10 @@ class ViewdetailFragment : Fragment(R.layout.fragment_viewdetail) {
             animateY(1000)
             invalidate()
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null // Avoid memory leaks
     }
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+
+    <!-- The color of your unread dot -->
+    <solid android:color="#2196F3" />
+
+    <!-- The size of the dot -->
+    <size
+        android:width="10dp"
+        android:height="10dp" />
+
+</shape>

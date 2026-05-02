@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/windowBackground"
+    android:orientation="vertical"
+    android:clickable="true"
+    android:focusable="true">
+
+<androidx.core.widget.NestedScrollView
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:padding="20dp">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <!-- Title: Auto-flips between Dark Grey and White -->
+    <TextView
+        android:id="@+id/tvDetailTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Notification Title"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <!-- Divider: Uses your Blue brand color (#1976D2) -->
+    <View
+        android:id="@+id/divider"
+        android:layout_width="60dp"
+        android:layout_height="3dp"
+        android:layout_marginTop="12dp"
+        android:background="?android:attr/colorPrimary" />
+
+    <!-- Timestamp: Subtle grey that adapts to background -->
+    <TextView
+        android:id="@+id/tvDetailTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="12 Oct, 10:30 AM"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="14sp" />
+
+    <!-- Message Body: Adaptive secondary text -->
+    <TextView
+        android:id="@+id/tvDetailBody"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:lineSpacingExtra="6sp"
+        android:text="The full message content goes here."
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="16sp" />
+
+</LinearLayout>
+</androidx.core.widget.NestedScrollView>
+
+    </LinearLayout>
