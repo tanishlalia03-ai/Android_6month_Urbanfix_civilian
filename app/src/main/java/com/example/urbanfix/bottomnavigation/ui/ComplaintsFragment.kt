@@ -2,6 +2,7 @@ package com.example.urbanfix.bottomnavigation.ui
 
 import android.os.Bundle
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -11,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.airbnb.lottie.LottieAnimationView
 import com.example.urbanfix.R
 import com.example.urbanfix.firebase.ComplaintModel
 import com.example.urbanfix.recyclerview.ComplaintAdapter
@@ -29,6 +31,10 @@ class ComplaintsFragment : Fragment(R.layout.fragment_complaints) {
     private lateinit var tvNoData: TextView
     private lateinit var recyclerView: RecyclerView
 
+    // New Components for Animation
+    private lateinit var emptyStateLayout: LinearLayout
+    private lateinit var lottieAnimation: LottieAnimationView
+
     private var currentFilterId: Int = R.id.chip_all
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -38,31 +44,30 @@ class ComplaintsFragment : Fragment(R.layout.fragment_complaints) {
         recyclerView = view.findViewById(R.id.rvComplaints)
         progressBar = view.findViewById(R.id.progressBar)
         tvNoData = view.findViewById(R.id.tvNoData)
+
+        // Initialize Animation Views
+        emptyStateLayout = view.findViewById(R.id.emptyStateLayout)
+        lottieAnimation = view.findViewById(R.id.lottieAnimation)
+
         val filterChipGroup = view.findViewById<ChipGroup>(R.id.filterChipGroup)
 
-        // Set up Adapter - initializing with an empty list
+        // Set up Adapter
         adapter = ComplaintAdapter(mutableListOf())
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
 
-        // Initial Loading State
         showLoading(true)
 
-        // Observe Data with Flow
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.complaints.collect { newList ->
-                    // Guard against null or issues during data transition
                     fullList = newList ?: emptyList()
-
                     showLoading(false)
-                    // Re-apply the current filter whenever data changes
                     filterData(currentFilterId)
                 }
             }
         }
 
-        // Chip selection logic
         filterChipGroup?.setOnCheckedStateChangeListener { _, checkedIds ->
             currentFilterId = checkedIds.firstOrNull() ?: R.id.chip_all
             filterData(currentFilterId)
@@ -78,14 +83,16 @@ class ComplaintsFragment : Fragment(R.layout.fragment_complaints) {
             else -> fullList
         }
 
-        // Update UI based on filtered list size
         if (filtered.isEmpty()) {
-            tvNoData.visibility = View.VISIBLE
+            // Show Animation and Text
+            emptyStateLayout.visibility = View.VISIBLE
             recyclerView.visibility = View.GONE
+            lottieAnimation.playAnimation()
         } else {
-            tvNoData.visibility = View.GONE
+            // Hide Animation and Show Data
+            emptyStateLayout.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
-            // Safely update the adapter
+            lottieAnimation.cancelAnimation()
             adapter?.updateList(filtered)
         }
     }
@@ -94,10 +101,10 @@ class ComplaintsFragment : Fragment(R.layout.fragment_complaints) {
         if (isLoading) {
             progressBar.visibility = View.VISIBLE
             recyclerView.visibility = View.GONE
-            tvNoData.visibility = View.GONE
+            emptyStateLayout.visibility = View.GONE
+            lottieAnimation.cancelAnimation()
         } else {
             progressBar.visibility = View.GONE
-
         }
     }
 }

@@ -9,6 +9,7 @@
     android:padding="1dp"
     tools:context=".bottomnavigation.ui.ComplaintsFragment">
 
+    <!-- YOUR CHIP GROUP SECTION - UNTOUCHED -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -69,6 +70,7 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
+        <!-- YOUR RECYCLERVIEW - UNTOUCHED -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvComplaints"
             android:layout_width="match_parent"
@@ -85,14 +87,36 @@
             android:layout_gravity="center"
             android:visibility="gone" />
 
-        <TextView
-            android:id="@+id/tvNoData"
+        <!-- NEW EMPTY STATE CONTAINER -->
+        <!-- I grouped the Lottie and Text so they stay together and centered -->
+        <LinearLayout
+            android:id="@+id/emptyStateLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="No complaints found"
-            android:textSize="16sp"
-            android:visibility="gone" />
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/lottieAnimation"
+                android:layout_width="180dp"
+                android:layout_height="180dp"
+                app:lottie_autoPlay="true"
+                app:lottie_loop="true"
+                app:lottie_rawRes="@raw/empty_state"
+                 />
+
+            <TextView
+                android:id="@+id/tvNoData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="No complaints found"
+                android:textSize="16sp"
+                android:textColor="#757575" />
+
+        </LinearLayout>
 
     </FrameLayout>
 

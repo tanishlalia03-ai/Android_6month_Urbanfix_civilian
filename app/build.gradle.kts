@@ -109,4 +109,6 @@ dependencies {
 
     //skeleton bar
     implementation("com.facebook.shimmer:shimmer:0.5.0")
+    //lottie files
+    implementation("com.airbnb.android:lottie:3.4.0")
 }
