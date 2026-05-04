@@ -135,7 +135,7 @@ class ReportFragment : Fragment() {
         textClassifier?.let { classifier ->
             val results = classifier.classify(desc)
             val topResult = results.maxByOrNull { it.score }
-            if (topResult?.label == "Negative" && topResult.score > 0.6) {
+            if (topResult?.label == "Negative" && topResult.score > 0.9) {
                 binding.etDescription.error = "Our AI detected a rude tone. Please be more professional."
                 Toast.makeText(context, "AI Filter: Negative tone detected", Toast.LENGTH_SHORT).show()
                 return
