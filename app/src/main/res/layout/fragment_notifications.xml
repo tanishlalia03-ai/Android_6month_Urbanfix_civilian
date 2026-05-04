@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- STATE 1: LOADING (Your Shimmer) -->
     <com.facebook.shimmer.ShimmerFrameLayout
         android:id="@+id/shimmerViewContainer"
         android:layout_width="match_parent"
@@ -21,6 +22,7 @@
         </LinearLayout>
     </com.facebook.shimmer.ShimmerFrameLayout>
 
+    <!-- STATE 2: DATA (Your RecyclerView) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewNotifications"
         android:layout_width="match_parent"
@@ -28,11 +30,34 @@
         android:paddingStart="2dp"
         android:paddingEnd="2dp"
         android:clipToPadding="false"
-        android:visibility="gone" /> <TextView
-    android:id="@+id/tvNoNotifications"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:text="No notifications yet"
-    android:visibility="gone" />
+        android:visibility="gone" />
+
+    <!-- STATE 3: EMPTY (New Lottie Implementation) -->
+    <LinearLayout
+        android:id="@+id/layoutEmptyNotifications"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/lottieNoNotifications"
+            android:layout_width="280dp"
+            android:layout_height="280dp"
+            app:lottie_rawRes="@raw/empty_notification"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true" />
+
+        <TextView
+            android:id="@+id/tvNoNotifications"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="No notifications yet"
+            android:textColor="#757575"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium" />
+    </LinearLayout>
+
 </FrameLayout>

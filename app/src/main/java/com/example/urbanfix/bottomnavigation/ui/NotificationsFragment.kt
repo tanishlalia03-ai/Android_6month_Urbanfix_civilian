@@ -46,11 +46,10 @@ class NotificationsFragment : Fragment() {
         val currentUser = FirebaseAuth.getInstance().currentUser?.uid ?: return
         database = FirebaseDatabase.getInstance().getReference("CivilianMessages")
 
-        // Use addValueEventListener to keep the list synced
         database.orderByChild("civilianId").equalTo(currentUser)
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    if (_binding == null) return // Safety check for fragment lifecycle
+                    if (_binding == null) return
 
                     notificationList.clear()
                     for (data in snapshot.children) {
@@ -62,12 +61,19 @@ class NotificationsFragment : Fragment() {
                     }
                     notificationList.sortByDescending { it.second.timestamp }
 
+                    // Stop and hide Shimmer
                     binding.shimmerViewContainer.stopShimmer()
                     binding.shimmerViewContainer.visibility = View.GONE
-                    binding.recyclerViewNotifications.visibility = View.VISIBLE
-                    adapter.notifyDataSetChanged()
 
-                    binding.tvNoNotifications.visibility = if (notificationList.isEmpty()) View.VISIBLE else View.GONE
+                    // TOGGLE LOGIC: Check if list is empty
+                    if (notificationList.isEmpty()) {
+                        binding.recyclerViewNotifications.visibility = View.GONE
+                        binding.layoutEmptyNotifications.visibility = View.VISIBLE
+                    } else {
+                        binding.layoutEmptyNotifications.visibility = View.GONE
+                        binding.recyclerViewNotifications.visibility = View.VISIBLE
+                        adapter.notifyDataSetChanged()
+                    }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -79,6 +85,7 @@ class NotificationsFragment : Fragment() {
             })
     }
 
+    // --- YOUR ADAPTER REMAINS UNTOUCHED ---
     inner class NotificationAdapter(private val list: List<Pair<String, NotificationModel>>) :
         RecyclerView.Adapter<NotificationAdapter.ViewHolder>() {
 
@@ -98,12 +105,9 @@ class NotificationsFragment : Fragment() {
             val sdf = SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault())
             holder.itemBinding.tvNotificationTime.text = sdf.format(Date(item.timestamp))
 
-            // --- BLUE DOT LOGIC ---
-            // If read is true, hide dot. If read is false, show dot.
             holder.itemBinding.viewUnreadDot.visibility = if (item.read) View.GONE else View.VISIBLE
 
             holder.itemView.setOnClickListener { view ->
-                // 1. Mark as read in Firebase safely
                 if (!item.read) {
                     FirebaseDatabase.getInstance().getReference("CivilianMessages")
                         .child(firebaseId)
@@ -111,21 +115,18 @@ class NotificationsFragment : Fragment() {
                         .setValue(true)
                 }
 
-                // 2. Pass data to Detail Fragment via Bundle
                 val bundle = Bundle().apply {
                     putString("title", item.title)
                     putString("body", item.body)
                     putLong("timestamp", item.timestamp)
                 }
 
-                // 3. Use the correct ACTION ID from your nav_graph
                 try {
                     view.findNavController().navigate(
                         R.id.action_notifications_to_viewDetail,
                         bundle
                     )
                 } catch (e: Exception) {
-                    // This prevents the crash if the ID is wrong, and lets you see the error in Logcat
                     e.printStackTrace()
                 }
             }
