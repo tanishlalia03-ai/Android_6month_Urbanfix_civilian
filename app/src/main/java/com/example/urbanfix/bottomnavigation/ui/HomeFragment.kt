@@ -67,8 +67,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         tvCompleted = view.findViewById(R.id.tv_count_completed)
         pieChart = view.findViewById(R.id.complaintsPieChart)
         homeScrollView = view.findViewById(R.id.home_scroll_view)
-        val mapContainer = view.findViewById<View>(R.id.map_container)
 
+        val mapContainer = view.findViewById<View>(R.id.map_container)
         mapContainer.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -83,10 +83,10 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             }
         }
 
-        val mapFragment = SupportMapFragment.newInstance()
-        childFragmentManager.beginTransaction()
-            .replace(R.id.map_container, mapFragment)
-            .commit()
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map_container) as? SupportMapFragment
+            ?: SupportMapFragment.newInstance().also {
+                childFragmentManager.beginTransaction().replace(R.id.map_container, it).commit()
+            }
         mapFragment.getMapAsync(this)
 
         auth.currentUser?.uid?.let { fetchUserName(it) }
@@ -126,59 +126,66 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     }
 
     private fun listenToUserComplaints(uid: String) {
-        // FIX: Point specifically to the logged-in user's folder
+        // Remove existing listener to prevent duplicate data triggers
+        complaintsListener?.let { userComplaintsRef?.removeEventListener(it) }
+
         userComplaintsRef = db.getReference("Complaints").child(uid)
 
         complaintsListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (!isAdded || mGoogleMap == null) return
 
-                var p = 0; var pr = 0; var c = 0
+                // CRITICAL: We reset the markers and the count variables to zero EVERY time.
+                var pCount = 0
+                var prCount = 0
+                var cCount = 0
+
                 mGoogleMap?.clear()
+
+                if (!snapshot.exists()) {
+                    updateSummaryTexts(0, 0, 0)
+                    updatePieChart(0, 0, 0)
+                    return
+                }
 
                 for (ds in snapshot.children) {
                     val status = ds.child("status").getValue(Int::class.java) ?: 0
                     val lat = ds.child("latitude").getValue(Double::class.java)
                     val lng = ds.child("longitude").getValue(Double::class.java)
 
-                    // Increment counters based on status
+                    // Increment based on current database state
                     when (status) {
-                        0 -> p++
-                        1 -> pr++
-                        2 -> c++
+                        0 -> pCount++
+                        1 -> prCount++
+                        2 -> cCount++
                     }
 
-                    // Add Markers to Map
                     if (lat != null && lng != null) {
                         val hue = when(status) {
-                            0 -> BitmapDescriptorFactory.HUE_RED      // Pending
-                            1 -> BitmapDescriptorFactory.HUE_ORANGE   // Active
-                            else -> BitmapDescriptorFactory.HUE_GREEN // Solved
+                            0 -> BitmapDescriptorFactory.HUE_RED
+                            1 -> BitmapDescriptorFactory.HUE_ORANGE
+                            else -> BitmapDescriptorFactory.HUE_GREEN
                         }
-
-                        val statusLabel = when(status) {
-                            0 -> "Pending"
-                            1 -> "Active"
-                            else -> "Solved"
-                        }
-
                         mGoogleMap?.addMarker(MarkerOptions()
                             .position(LatLng(lat, lng))
-                            .title("Status: $statusLabel")
+                            .title("Status: ${if(status==0) "Pending" else if(status==1) "Active" else "Solved"}")
                             .icon(BitmapDescriptorFactory.defaultMarker(hue)))
                     }
                 }
 
-                // Update UI Texts
-                tvPending?.text = String.format("%02d", p)
-                tvProgress?.text = String.format("%02d", pr)
-                tvCompleted?.text = String.format("%02d", c)
-
-                updatePieChart(p, pr, c)
+                // Update UI with the final recalculated counts
+                updateSummaryTexts(pCount, prCount, cCount)
+                updatePieChart(pCount, prCount, cCount)
             }
             override fun onCancelled(error: DatabaseError) {}
         }
         userComplaintsRef?.addValueEventListener(complaintsListener!!)
+    }
+
+    private fun updateSummaryTexts(p: Int, pr: Int, c: Int) {
+        tvPending?.text = String.format("%02d", p)
+        tvProgress?.text = String.format("%02d", pr)
+        tvCompleted?.text = String.format("%02d", c)
     }
 
     private fun fetchUserName(uid: String) {
@@ -189,32 +196,36 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
     private fun updatePieChart(p: Int, pr: Int, c: Int) {
         val entries = ArrayList<PieEntry>()
+
+        // Only add entries that have a value > 0
         if (p > 0) entries.add(PieEntry(p.toFloat(), "Pending"))
         if (pr > 0) entries.add(PieEntry(pr.toFloat(), "Active"))
         if (c > 0) entries.add(PieEntry(c.toFloat(), "Solved"))
 
         if (entries.isEmpty()) {
-            pieChart?.clear()
+            pieChart?.data = null
+            pieChart?.invalidate()
             return
         }
 
         val dataSet = PieDataSet(entries, "").apply {
             colors = listOf(
-                Color.parseColor("#1976D2"), // Deep Blue (Matches Pending text)
-                Color.parseColor("#F57C00"), // Deep Orange (Matches Active text)
-                Color.parseColor("#0097A7")  // Green for Solved
+                Color.parseColor("#1976D2"),
+                Color.parseColor("#F57C00"),
+                Color.parseColor("#0097A7")
             )
             valueTextSize = 12f
             valueTextColor = Color.WHITE
         }
 
+        val pieData = PieData(dataSet)
         pieChart?.apply {
-            data = PieData(dataSet)
+            data = pieData
             description.isEnabled = false
             legend.isEnabled = false
             setHoleColor(Color.TRANSPARENT)
-            animateY(1000)
-            invalidate()
+            notifyDataSetChanged() // Tell chart data has changed
+            invalidate() // Redraw
         }
     }
 
@@ -232,9 +243,14 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         mAdView?.destroy()
         complaintsListener?.let { userComplaintsRef?.removeEventListener(it) }
 
-        // Clean up references for memory
-        tvUserName = null; tvPending = null; tvProgress = null; tvCompleted = null
-        pieChart = null; mGoogleMap = null; homeScrollView = null; mAdView = null
+        tvUserName = null
+        tvPending = null
+        tvProgress = null
+        tvCompleted = null
+        pieChart = null
+        mGoogleMap = null
+        homeScrollView = null
+        mAdView = null
         super.onDestroyView()
     }
 }
