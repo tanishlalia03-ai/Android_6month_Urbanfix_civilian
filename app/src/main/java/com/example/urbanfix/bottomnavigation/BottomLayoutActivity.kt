@@ -68,9 +68,6 @@ class BottomLayoutActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_bottom_layout)
 
-        // UI Setup
-        window.statusBarColor = getColor(R.color.blue_main)
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)

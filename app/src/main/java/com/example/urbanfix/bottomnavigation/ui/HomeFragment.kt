@@ -135,7 +135,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (!isAdded || mGoogleMap == null) return
 
-                // CRITICAL: We reset the markers and the count variables to zero EVERY time.
                 var pCount = 0
                 var prCount = 0
                 var cCount = 0
@@ -153,7 +152,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
                     val lat = ds.child("latitude").getValue(Double::class.java)
                     val lng = ds.child("longitude").getValue(Double::class.java)
 
-                    // Increment based on current database state
                     when (status) {
                         0 -> pCount++
                         1 -> prCount++
@@ -173,7 +171,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
                     }
                 }
 
-                // Update UI with the final recalculated counts
                 updateSummaryTexts(pCount, prCount, cCount)
                 updatePieChart(pCount, prCount, cCount)
             }
@@ -197,7 +194,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     private fun updatePieChart(p: Int, pr: Int, c: Int) {
         val entries = ArrayList<PieEntry>()
 
-        // Only add entries that have a value > 0
         if (p > 0) entries.add(PieEntry(p.toFloat(), "Pending"))
         if (pr > 0) entries.add(PieEntry(pr.toFloat(), "Active"))
         if (c > 0) entries.add(PieEntry(c.toFloat(), "Solved"))
@@ -210,9 +206,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
         val dataSet = PieDataSet(entries, "").apply {
             colors = listOf(
-                Color.parseColor("#1976D2"),
-                Color.parseColor("#F57C00"),
-                Color.parseColor("#0097A7")
+                Color.parseColor("#1976D2"), // Elegant Blue for Pending
+                Color.parseColor("#F57C00"), // Smooth Orange for Active
+                Color.parseColor("#0097A7")  // Deep Cyan for Solved
             )
             valueTextSize = 12f
             valueTextColor = Color.WHITE
@@ -224,8 +220,12 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             description.isEnabled = false
             legend.isEnabled = false
             setHoleColor(Color.TRANSPARENT)
-            notifyDataSetChanged() // Tell chart data has changed
-            invalidate() // Redraw
+
+            // Modern rotation spin animation over 1400 milliseconds
+            animateY(1400)
+
+            notifyDataSetChanged()
+            invalidate()
         }
     }
 

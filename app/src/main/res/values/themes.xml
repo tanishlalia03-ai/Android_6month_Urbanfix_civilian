@@ -1,6 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <color name="google_lavender_blue">#F1F5FB</color>
-    <color name="dark_white_card">#FAFAFA</color>
+    <color name="premium_bg">#F8F9FA</color>
+    <color name="premium_card_contrast">#E2E8F0</color>
+    <color name="premium_surface_variant">#F1F3F5</color>
+    <color name="text_primary">#1E2229</color>
+    <color name="text_secondary">#5C6470</color>
 
     <style name="Base.Theme.Urbanfix" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">#1976D2</item>
@@ -8,13 +11,17 @@
         <item name="colorSecondary">#42A5F5</item>
         <item name="colorOnSecondary">#FFFFFF</item>
 
-        <item name="android:statusBarColor">#1976D2</item>
-        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@color/premium_bg</item>
+        <item name="android:windowLightStatusBar">true</item>
 
-        <item name="android:windowBackground">@color/google_lavender_blue</item>
-        <item name="colorSurface">@color/dark_white_card</item>
-        <item name="colorOnSurface">#212121</item>
-        <item name="colorSurfaceVariant">#ECEFF1</item>
+        <item name="android:windowBackground">@color/premium_bg</item>
+        <item name="colorSurface">@color/premium_bg</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+
+        <item name="colorSurfaceVariant">@color/premium_card_contrast</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+
+        <item name="colorSurfaceContainer">#FFFFFF</item>
 
         <item name="elevationOverlayEnabled">false</item>
 
@@ -26,15 +33,19 @@
     <style name="Theme.Urbanfix.Small" parent="Theme.Urbanfix">
         <item name="android:textSize">12sp</item>
     </style>
+
     <style name="Theme.Urbanfix.Medium" parent="Theme.Urbanfix">
         <item name="android:textSize">16sp</item>
     </style>
+
     <style name="Theme.Urbanfix.Sans" parent="Theme.Urbanfix">
         <item name="android:fontFamily">sans-serif</item>
     </style>
+
     <style name="Theme.Urbanfix.Serif" parent="Theme.Urbanfix">
         <item name="android:fontFamily">serif</item>
     </style>
+
     <style name="Theme.Urbanfix.Mono" parent="Theme.Urbanfix">
         <item name="android:fontFamily">monospace</item>
     </style>

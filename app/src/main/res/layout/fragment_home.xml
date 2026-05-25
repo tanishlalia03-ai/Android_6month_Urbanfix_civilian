@@ -17,61 +17,59 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="5dp">
-
-            <RelativeLayout
-                android:layout_width="match_parent"
+            android:padding="16dp"> <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp">
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="28dp">
+                android:orientation="vertical"
+                android:layout_alignParentStart="true">
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_alignParentStart="true">
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Hello, "
-                            android:textSize="22sp"
-                            android:textColor="?attr/colorOnSurface"
-                            android:fontFamily="sans-serif-medium" />
-                        <TextView
-                            android:id="@+id/tv_user_name"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Tanish"
-                            android:textSize="22sp"
-                            android:textColor="?attr/colorPrimary"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                    android:orientation="horizontal">
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Report issues around you"
-                        android:textColor="?attr/colorOnSurfaceVariant"
-                        android:textSize="14sp" />
+                        android:text="Hello, "
+                        android:textSize="22sp"
+                        android:textColor="?attr/colorOnSurface"
+                        android:fontFamily="sans-serif-medium" />
+                    <TextView
+                        android:id="@+id/tv_user_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tanish"
+                        android:textSize="22sp"
+                        android:textColor="?attr/colorPrimary"
+                        android:textStyle="bold" />
                 </LinearLayout>
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    app:cardCornerRadius="24dp"
-                    app:cardElevation="0dp"
-                    app:strokeWidth="1dp"
-                    app:strokeColor="?attr/colorOutlineVariant">
-                    <ImageView
-                        android:id="@+id/iv_profile_image"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/ic_flag" />
-                </com.google.android.material.card.MaterialCardView>
-            </RelativeLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Report issues around you"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textSize="14sp" />
+            </LinearLayout>
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="?attr/colorOutlineVariant">
+                <ImageView
+                    android:id="@+id/iv_profile_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_flag" />
+            </com.google.android.material.card.MaterialCardView>
+        </RelativeLayout>
 
             <TextView
                 android:layout_width="match_parent"
@@ -126,23 +124,21 @@
                 app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp"
-                android:layout_margin="4dp">
-                <LinearLayout android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="6dp">
-                    <TextView android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Visual Analytics"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="?attr/colorOnSurface"
-                        android:layout_marginBottom="8dp"/>
-                    <com.github.mikephil.charting.charts.PieChart
-                        android:id="@+id/complaintsPieChart"
-                        android:layout_width="match_parent"
-                        android:layout_height="250dp" />
-                </LinearLayout>
+                app:cardBackgroundColor="?attr/colorSurfaceVariant"> <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"> <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Visual Analytics"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="12dp"/>
+                <com.github.mikephil.charting.charts.PieChart
+                    android:id="@+id/complaintsPieChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp" />
+            </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
@@ -159,8 +155,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
                 app:cardCornerRadius="24dp"
-                app:cardElevation="1dp"
-                app:strokeWidth="1dp">
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="?attr/colorSurfaceVariant" app:cardBackgroundColor="?attr/colorSurfaceVariant">
                 <FrameLayout
                     android:id="@+id/map_container"
                     android:layout_width="match_parent"
@@ -175,14 +172,16 @@
                 app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
-                <ImageView android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/ic_urbanhome" />
-                <View android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="#40000000"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="bottom|start" android:layout_margin="20dp" android:text="Building a better city together" android:textColor="@android:color/white" android:textStyle="bold" android:textSize="18sp"/>
+                <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
+                    <ImageView android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_urbanhome" />
+                    <View android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="#40000000"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="bottom|start" android:layout_margin="20dp" android:text="Building a better city together" android:textColor="@android:color/white" android:textStyle="bold" android:textSize="18sp"/>
+                </FrameLayout>
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
@@ -194,7 +193,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         app:cardCornerRadius="0dp"
-        app:cardElevation="16dp"
+        app:cardElevation="8dp"
         app:strokeWidth="1dp"
         app:strokeColor="?attr/colorOutlineVariant">
 

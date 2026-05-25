@@ -4,16 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/windowBackground"> <ProgressBar
-    android:id="@+id/profile_progress_bar"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:elevation="15dp"
-    android:visibility="gone"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent" />
+    android:background="?android:attr/windowBackground">
+
+    <ProgressBar
+        android:id="@+id/profile_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:elevation="15dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
         android:id="@+id/profile_scroll_view"
@@ -66,9 +68,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Welcome,"
-                        android:alpha="0.6"
-                        android:textColor="?attr/colorOnSurface"
-                        android:textSize="14sp" />
+                        android:textColor="?attr/colorOnSurfaceVariant" android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/tv_header_name"
@@ -108,8 +108,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="?attr/colorSurface"
-                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="?attr/colorSurfaceVariant" app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
                 app:strokeWidth="0dp">
 
@@ -135,9 +134,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Email Address"
-                            android:alpha="0.5"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textSize="12sp" />
+                            android:textColor="?attr/colorOnSurfaceVariant" android:textSize="12sp" />
 
                         <TextView
                             android:id="@+id/tv_profile_email"
@@ -155,8 +152,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="?attr/colorSurface"
-                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="?attr/colorSurfaceVariant" app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
                 app:strokeWidth="0dp">
 
@@ -182,9 +178,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Phone Number"
-                            android:alpha="0.5"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textSize="12sp" />
+                            android:textColor="?attr/colorOnSurfaceVariant" android:textSize="12sp" />
 
                         <TextView
                             android:id="@+id/tv_profile_phone"
@@ -202,8 +196,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="?attr/colorSurface"
-                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="?attr/colorSurfaceVariant" app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
                 app:strokeWidth="0dp">
 
@@ -229,9 +222,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="User Role"
-                            android:alpha="0.5"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textSize="12sp" />
+                            android:textColor="?attr/colorOnSurfaceVariant" android:textSize="12sp" />
 
                         <TextView
                             android:id="@+id/tv_profile_role"
@@ -249,8 +240,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                app:cardBackgroundColor="?attr/colorSurface"
-                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="?attr/colorSurfaceVariant" app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
                 app:strokeWidth="0dp">
 
@@ -276,9 +266,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Location"
-                            android:alpha="0.5"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textSize="12sp" />
+                            android:textColor="?attr/colorOnSurfaceVariant" android:textSize="12sp" />
 
                         <TextView
                             android:id="@+id/tv_profile_address"
@@ -309,11 +297,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                android:alpha="0.4"
                 android:gravity="center"
                 android:text="UrbanFix Version 1.0.4"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="11sp" />
+                android:textColor="?attr/colorOnSurfaceVariant" android:textSize="11sp" />
 
         </LinearLayout>
     </ScrollView>

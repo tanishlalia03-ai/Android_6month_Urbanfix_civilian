@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -31,14 +32,14 @@
                 android:id="@+id/tvCategory"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Category: -----"
+                android:textColor="?attr/colorOnSurface" android:text="Category: -----"
                 android:layout_marginTop="4dp" />
 
             <TextView
                 android:id="@+id/tvStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Status: -----" />
+                android:textColor="?attr/colorOnSurface" android:text="Status: -----" />
 
             <TextView
                 android:id="@+id/tvUrgency"
@@ -52,7 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Date: ----"
-                android:alpha="0.7" />
+                android:textColor="?attr/colorOnSurfaceVariant" />
         </LinearLayout>
 
         <ScrollView
@@ -73,7 +74,8 @@
                     android:layout_height="280dp"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp"
-                    app:strokeWidth="0dp">
+                    app:strokeWidth="0dp"
+                    app:cardBackgroundColor="?attr/colorSurfaceVariant" >
 
                     <FrameLayout
                         android:layout_width="match_parent"
@@ -105,7 +107,8 @@
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp"
                     app:strokeWidth="0dp"
-                    app:contentPadding="16dp">
+                    app:contentPadding="16dp"
+                    app:cardBackgroundColor="?attr/colorSurfaceVariant" >
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -125,7 +128,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
                             android:text="Loading..."
-                            android:lineSpacingExtra="4dp" />
+                            android:textColor="?attr/colorOnSurface" android:lineSpacingExtra="4dp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -134,7 +137,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Location: -----"
-                    android:layout_marginTop="20dp"
+                    android:textColor="?attr/colorOnSurface" android:layout_marginTop="20dp"
                     app:drawableStartCompat="@android:drawable/ic_menu_mylocation"
                     android:drawablePadding="8dp" />
 
@@ -145,7 +148,8 @@
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp"
                     app:strokeWidth="0dp"
-                    app:contentPadding="16dp">
+                    app:contentPadding="16dp"
+                    app:cardBackgroundColor="?attr/colorSurfaceVariant" >
 
                     <LinearLayout
                         android:layout_width="match_parent"
