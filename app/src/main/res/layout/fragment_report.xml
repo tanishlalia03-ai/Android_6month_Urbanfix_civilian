@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -26,7 +27,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Help UrbanFix improve your community"
-            android:textColor="?attr/colorOnSurfaceVariant" android:textSize="14sp" />
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="14sp" />
     </LinearLayout>
 
     <ScrollView
@@ -48,7 +50,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant" app:cardCornerRadius="20dp"
+                app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                app:cardCornerRadius="20dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
 
@@ -112,7 +115,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant" app:cardCornerRadius="20dp"
+                app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                app:cardCornerRadius="20dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
 
@@ -125,45 +129,33 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Timeline"
+                        android:text="Report Timeline"
                         android:textStyle="bold"
                         android:textColor="?attr/colorPrimary" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:orientation="horizontal"
-                        android:weightSum="2">
+                        android:layout_marginTop="10dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnPickDate"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_width="0dp"
-                            android:layout_height="54dp"
-                            android:layout_weight="1"
-                            android:layout_marginEnd="6dp"
-                            android:text="Date"
-                            app:icon="@drawable/ic_calendar" />
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_timer"
+                            app:tint="?attr/colorOnSurfaceVariant" />
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnPickTime"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_width="0dp"
-                            android:layout_height="54dp"
-                            android:layout_weight="1"
-                            android:layout_marginStart="6dp"
-                            android:text="Time"
-                            app:icon="@drawable/ic_timer" />
+                        <TextView
+                            android:id="@+id/tvSelectedDateTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:text="Fetching current time..."
+                            android:textColor="?attr/colorOnSurface"
+                            android:textSize="15sp"
+                            android:textStyle="normal" />
                     </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/tvSelectedDateTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Time not set"
-                        android:textColor="?attr/colorOnSurfaceVariant" android:textSize="12sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -171,7 +163,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant" app:cardCornerRadius="20dp"
+                app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                app:cardCornerRadius="20dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
 
@@ -222,7 +215,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="Location not set"
-                        android:textColor="?attr/colorOnSurfaceVariant" android:textSize="12sp" />
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:textSize="12sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -230,7 +224,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant" app:cardCornerRadius="20dp"
+                app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                app:cardCornerRadius="20dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
 
@@ -317,7 +312,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Standard" />
+                    android:text="Medium" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnHigh"
@@ -325,17 +320,20 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Urgent" />
+                    android:text="High" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSubmit"
+                style="@style/Widget.Material3.Button"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:text="Submit Report"
+                android:layout_height="56dp"
+                android:text="Submit"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                app:cornerRadius="16dp" />
+                app:cornerRadius="28dp" />
 
         </LinearLayout>
     </ScrollView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

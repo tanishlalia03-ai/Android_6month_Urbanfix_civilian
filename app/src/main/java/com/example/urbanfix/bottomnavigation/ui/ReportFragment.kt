@@ -28,9 +28,6 @@ import com.example.urbanfix.firebase.ComplaintModel
 import com.example.urbanfix.recyclerviewImage.ImagePreviewAdapter
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
-import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.TimeFormat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.coroutines.Dispatchers
@@ -52,11 +49,9 @@ class ReportFragment : Fragment() {
     private lateinit var imageAdapter: ImagePreviewAdapter
     private val appwriteManager by lazy { AppwriteManager.getInstance(requireContext()) }
 
-    private var selectedDate: String = ""
-    private var selectedTime: String = ""
+    private var tempCameraUri: Uri? = null
     private var latitude: Double = 0.0
     private var longitude: Double = 0.0
-    private var tempCameraUri: Uri? = null
 
     private val bucketID = "6996dc680036b04ee5f0"
     private var textClassifier: NLClassifier? = null
@@ -85,10 +80,12 @@ class ReportFragment : Fragment() {
         return binding.root
     }
 
+    // --- FIX APPLIED: Capitalized 'View' to match parent signature correctly ---
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         setupCategoryDropdown()
+        setAutoDateTimeUI() // Automatically fetch and show current system time
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
@@ -103,9 +100,13 @@ class ReportFragment : Fragment() {
         }
         binding.btnCurrentLoc.setOnClickListener { checkLocationPermissions() }
         binding.btnManualLoc.setOnClickListener { showManualLocationDialog() }
-        setupDateTimePickers()
 
         binding.btnSubmit.setOnClickListener { handleSubmit() }
+    }
+
+    private fun setAutoDateTimeUI() {
+        val currentDateTime = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault()).format(Date())
+        binding.tvSelectedDateTime.text = currentDateTime
     }
 
     private fun handleSubmit() {
@@ -161,10 +162,10 @@ class ReportFragment : Fragment() {
             try {
                 val urls = selectedImagesList.mapNotNull { appwriteManager.uploadAndGetUrl(requireContext(), bucketID, it) }
 
-                // --- FIX APPLIED: Data is now nested under the User's UID ---
                 val dbRef = FirebaseDatabase.getInstance().getReference("Complaints").child(civilianId)
 
-                val datePart = SimpleDateFormat("yyyyMMdd-HHmm", Locale.getDefault()).format(Date())
+                val currentTimeMillis = System.currentTimeMillis()
+                val datePart = SimpleDateFormat("yyyyMMdd-HHmm", Locale.getDefault()).format(Date(currentTimeMillis))
                 val randomPart = UUID.randomUUID().toString().substring(0, 4).uppercase()
                 val systematicKey = "UF-$datePart-$randomPart"
 
@@ -186,13 +187,12 @@ class ReportFragment : Fragment() {
                     civilianId = civilianId,
                     latitude = latitude,
                     longitude = longitude,
-                    timeStamp = System.currentTimeMillis(),
+                    timeStamp = currentTimeMillis,
                     status = 0,
                     priority = priorityValue,
                     location = binding.tvSelectedLocation.text.toString()
                 )
 
-                // Saves to: Complaints -> {civilianId} -> {systematicKey}
                 dbRef.child(systematicKey).setValue(complaint).addOnSuccessListener {
 
                     val adminMsgRef = FirebaseDatabase.getInstance().getReference("AdminMessages").push()
@@ -251,29 +251,6 @@ class ReportFragment : Fragment() {
         } else {
             Toast.makeText(context, "Maximum 3 images allowed", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun setupDateTimePickers() {
-        binding.btnPickDate.setOnClickListener {
-            val dp = MaterialDatePicker.Builder.datePicker().build()
-            dp.show(parentFragmentManager, "DATE")
-            dp.addOnPositiveButtonClickListener {
-                selectedDate = SimpleDateFormat("dd/MMM/yyyy", Locale.getDefault()).format(Date(it))
-                updateDateTimeUI()
-            }
-        }
-        binding.btnPickTime.setOnClickListener {
-            val tp = MaterialTimePicker.Builder().setTimeFormat(TimeFormat.CLOCK_12H).build()
-            tp.show(parentFragmentManager, "TIME")
-            tp.addOnPositiveButtonClickListener {
-                selectedTime = String.format(Locale.getDefault(), "%02d:%02d", tp.hour, tp.minute)
-                updateDateTimeUI()
-            }
-        }
-    }
-
-    private fun updateDateTimeUI() {
-        binding.tvSelectedDateTime.text = "$selectedDate $selectedTime".trim()
     }
 
     private fun showManualLocationDialog() {

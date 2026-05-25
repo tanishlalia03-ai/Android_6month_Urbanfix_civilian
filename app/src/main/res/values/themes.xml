@@ -49,4 +49,11 @@
     <style name="Theme.Urbanfix.Mono" parent="Theme.Urbanfix">
         <item name="android:fontFamily">monospace</item>
     </style>
+
+    <style name="ToolbarInlineTitleFont" parent="TextAppearance.Material3.ActionBar.Title">
+        <item name="fontFamily">@font/bricolage_bold</item>
+        <item name="android:fontFamily">@font/bricolage_bold</item>
+        <item name="android:textSize">34sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>

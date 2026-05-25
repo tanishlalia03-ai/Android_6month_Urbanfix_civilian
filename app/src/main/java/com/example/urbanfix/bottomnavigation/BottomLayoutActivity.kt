@@ -15,7 +15,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
-import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -68,19 +67,21 @@ class BottomLayoutActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_bottom_layout)
 
-
+        // Toolbar Configuration
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
+        // Navigation Controller Configuration
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
         navController = navHostFragment.navController
 
-        // Navigation Setup
+        // Setup App Bar Configuration
         val appBarConfiguration = AppBarConfiguration(
             setOf(R.id.navigation_home, R.id.navigation_report, R.id.navigation_complaints, R.id.navigation_notifications, R.id.navigation_profile)
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
 
+        // Bottom Navigation View Setup
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNavigationView.setupWithNavController(navController)
 
@@ -144,7 +145,7 @@ class BottomLayoutActivity : AppCompatActivity() {
         ref.addChildEventListener(broadcastListener!!)
     }
 
-    // --- CIVILIAN LOGIC (Personal) ---
+    // --- CIVILIAN LOGIC (Personal Messages & Status Changes) ---
     private fun startCivilianMessageListener() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val ref = FirebaseDatabase.getInstance().getReference("CivilianMessages")
@@ -168,7 +169,7 @@ class BottomLayoutActivity : AppCompatActivity() {
                 // Debug log to compare IDs in Logcat
                 Log.d(TAG, "Comparing DB UID: $civilianIdFromDB with Current UID: $currentUid")
 
-                // Only show if the ID matches exactly (ignoring case for safety)
+                // Only show if the ID matches exactly
                 if (civilianIdFromDB.equals(currentUid, ignoreCase = true)) {
                     val title = snapshot.child("title").value?.toString() ?: "Status Update"
                     val body = snapshot.child("body").value?.toString().orEmpty()
@@ -188,12 +189,12 @@ class BottomLayoutActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Null-safe cleanup of listeners
+        // Safe lifecycle cleanup of listener workers
         broadcastListener?.let { broadcastRef?.removeEventListener(it) }
         civilianMessageListener?.let { civilianMessageRef?.removeEventListener(it) }
     }
 
-    // --- MENU CODE ---
+    // --- OPTION MENU INFLATION ---
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
         return true
